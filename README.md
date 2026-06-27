@@ -128,3 +128,44 @@ IBM Code Engine is a fully managed serverless platform that runs containerized w
    - `WATSONX_URL` (Set to `https://eu-de.ml.cloud.ibm.com`)
    - `FLASK_SECRET_KEY` (Define as a secure secret)
 7. Click **Create** to deploy. Code Engine will build the container, route traffic, and scale instances to zero when idle.
+# Screenshots
+
+## Home Dashboard
+
+![Home](screenshots/Screenshot%202026-06-27%20195711.png)
+
+---
+
+## Interview Preparation Dashboard
+
+![Dashboard](screenshots/Screenshot%202026-06-27%20195848.png)
+
+---
+
+## Interactive AI Interview
+
+![Simulator](screenshots/Screenshot%202026-06-27%20195857.png)
+
+---
+
+## AI Feedback
+
+![Feedback](screenshots/Screenshot%202026-06-27%20200019.png)
+
+---
+
+## Interview Performance
+
+![Results](screenshots/Screenshot%202026-06-27%20200625.png)
+
+---
+
+## Critical Missing Skills
+
+![Missing Skills](screenshots/Screenshot%202026-06-27%20200636.png)
+
+---
+
+## Model Answer Reference
+
+![Ideal Answer](screenshots/Screenshot%202026-06-27%20200643.png)
