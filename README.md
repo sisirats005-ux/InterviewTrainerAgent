@@ -144,12 +144,6 @@ IBM Code Engine is a fully managed serverless platform that runs containerized w
 
 ## Interactive AI Interview
 
-![Simulator](screenshots/Screenshot%202026-06-27%20195857.png)
-
----
-
-## AI Feedback
-
 ![Feedback](screenshots/Screenshot%202026-06-27%20200019.png)
 
 ---
