@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: interview_trainer_agent
+    ports:
+      - "5000:5000"
+    environment:
+      - WATSONX_APIKEY=${WATSONX_APIKEY}
+      - WATSONX_PROJECT_ID=${WATSONX_PROJECT_ID}
+      - WATSONX_URL=${WATSONX_URL:-https://eu-de.ml.cloud.ibm.com}
+      - FLASK_SECRET_KEY=${FLASK_SECRET_KEY:-dev_secret_key_docker_compose_999}
+    volumes:
+      - ./uploads:/app/uploads
+      - ./vector_db:/app/vector_db
+      - ./static/charts:/app/static/charts
+    restart: always

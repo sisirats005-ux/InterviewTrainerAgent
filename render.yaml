@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: interview-trainer-agent
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --bind 0.0.0.0:5000 --timeout 120 app:app
+    envVars:
+      - key: WATSONX_APIKEY
+        sync: false
+      - key: WATSONX_PROJECT_ID
+        sync: false
+      - key: WATSONX_URL
+        value: https://eu-de.ml.cloud.ibm.com
+      - key: FLASK_SECRET_KEY
+        generateValue: true

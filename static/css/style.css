@@ -1,0 +1,10 @@
+/* ==========================================================================
+   Interview Trainer Agent - CSS Reset Override
+   ========================================================================== */
+
+/* The application is now fully styled with Tailwind utility classes.
+   This file is kept for global transitions or browser overrides. */
+
+body {
+    transition: background-color 0.25s ease-in-out, color 0.25s ease-in-out;
+}

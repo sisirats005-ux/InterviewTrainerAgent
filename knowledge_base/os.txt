@@ -1,0 +1,38 @@
+=== OPERATING SYSTEMS (OS) TECHNICAL INTERVIEW KNOWLEDGE BASE ===
+
+--- TOPIC: PROCESSES VS. THREADS ---
+- Process: An executing program instance. It has its own isolated memory space (address space, code, data, file descriptors, environment variables). Processes are independent and context switching between them is relatively expensive.
+- Thread: The smallest unit of execution within a process. Multiple threads within the same process share the process's memory space (code, data, heap, files) but have their own call stack, program counter (PC), and CPU register state. Context switching between threads is faster.
+- Thread Safety: Ensuring shared memory accessed by multiple threads is synchronized using locks, mutexes, or semaphores to prevent race conditions.
+
+--- TOPIC: PROCESS SCHEDULING ---
+- Scheduler: Part of the OS that decides which process runs on the CPU.
+- Scheduling Algorithms:
+  - First-Come First-Served (FCFS): Non-preemptive, simple, suffers from Convoy Effect (short processes waiting behind long ones).
+  - Shortest Job First (SJF): Schedules process with shortest CPU burst. Provably optimal for average waiting time.
+  - Round Robin (RR): Preemptive scheduling where each process gets a small fixed slice of CPU time (time quantum) in a cyclic queue. Excellent for time-sharing systems.
+  - Priority Scheduling: Schedules processes based on priority. Can lead to starvation (low priority tasks never run). Resolved using Aging.
+
+--- TOPIC: MEMORY MANAGEMENT & VIRTUAL MEMORY ---
+- Virtual Memory: A technique that allows execution of processes that are not completely in physical memory. It maps virtual addresses used by a program to physical addresses in RAM.
+- Paging: Divides physical memory into fixed-size blocks (Frames) and logical memory into blocks of the same size (Pages). Solves external fragmentation.
+- Page Fault: An interrupt raised by hardware when a program accesses a page that is mapped in virtual address space but not loaded in physical RAM. The OS must load it from disk.
+- Thrashing: A state where a system spends more time swapping pages in and out of disk than executing instructions. Caused by insufficient RAM for the active processes' working sets.
+
+--- TOPIC: INTER-PROCESS COMMUNICATION (IPC) ---
+- Since processes have isolated memory, they communicate using IPC mechanisms:
+  - Pipes (Named/Unnamed): Unidirectional data channels.
+  - Shared Memory: Multiple processes map a region of physical memory to their address spaces. Fastest IPC because no copying is needed, but requires synchronization (semaphores).
+  - Message Passing / Message Queues: OS-managed queues where processes write and read messages.
+  - Sockets: Network-based communication (can be used on local machine via loopback or across different machines).
+
+--- TECHNICAL INTERVIEW QUESTIONS & MODEL ANSWERS ---
+Q: What is a deadlock and what are the four necessary conditions for it to occur?
+A: A deadlock occurs when a set of processes are blocked because each process holds a resource and waits for another resource held by some other process. The four Coffman conditions are:
+1. Mutual Exclusion: At least one resource must be held in a non-shareable mode.
+2. Hold and Wait: A process must hold at least one resource and be waiting to acquire additional resources held by other processes.
+3. No Preemption: Resources cannot be forcibly taken from a process; they can only be released voluntarily.
+4. Circular Wait: A closed chain of processes exists, where each process holds one or more resources that are needed by the next process in the chain.
+
+Q: Explain the difference between a Mutex and a Semaphore.
+A: A Mutex (Mutual Exclusion object) is a locking mechanism used to synchronize access to a single shared resource. It is ownership-based: only the thread that locked the mutex can unlock it. A Semaphore is a signaling mechanism. A binary semaphore is similar to a mutex but has no owner concept. A counting semaphore uses a counter to allow a specific number of threads (N) to access a resource concurrently. Any thread can signal (increment) or wait (decrement) a semaphore.

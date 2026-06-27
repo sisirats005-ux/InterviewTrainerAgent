@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block title %}JD Match Result - Interview Trainer Agent{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-4xl space-y-8">
+    
+    <!-- Header info line -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-100 dark:border-slate-900 pb-5">
+        <div class="space-y-1">
+            <div class="flex items-center gap-2 text-sm font-medium text-slate-400 dark:text-slate-500">
+                <span>Matcher</span>
+                <i data-lucide="chevron-right" class="h-3.5 w-3.5"></i>
+                <span class="text-slate-650 dark:text-slate-400 font-semibold">Match Results</span>
+            </div>
+            <h1 class="font-heading text-3xl sm:text-[40px] font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">Compatibility Analysis</h1>
+            <p class="text-sm text-slate-400 flex items-center gap-1">
+                <i data-lucide="cpu" class="h-4 w-4 text-emerald-500"></i>
+                Semantics evaluated against job requirements by IBM Granite.
+            </p>
+        </div>
+        
+        <div>
+            <a href="{{ url_for('jd_match') }}" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-base font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-950 dark:border-slate-800 dark:bg-[#0c0d12] dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-white shadow-sm transition-all">
+                <i data-lucide="refresh-cw" class="h-4 w-4"></i>
+                <span>Match Another Job</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Summary Metrics Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 border-b border-slate-100 dark:border-slate-900 pb-8">
+        <!-- Match Circle Gauge -->
+        <div class="flex items-center gap-4">
+            <div class="relative w-16 h-16 flex-shrink-0">
+                <svg class="w-full h-full -rotate-90">
+                    <defs>
+                        <linearGradient id="indigoCyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#10b981" />
+                            <stop offset="100%" stop-color="#6366f1" />
+                        </linearGradient>
+                    </defs>
+                    <circle class="stroke-slate-100 dark:stroke-slate-800/80 fill-none" stroke-width="5.5" cx="32" cy="32" r="27"></circle>
+                    <circle class="progress fill-none" id="match-progress-ring" stroke-width="5.5" stroke-linecap="round" stroke="url(#indigoCyanGrad)" cx="32" cy="32" r="27" style="stroke-dasharray: 169.6; stroke-dashoffset: 169.6;"></circle>
+                </svg>
+                <div class="absolute inset-0 flex items-center justify-center font-heading text-base font-extrabold text-slate-855 dark:text-white" id="match-score-text">
+                    {{ report.match_percentage }}%
+                </div>
+            </div>
+            <div>
+                <h5 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Job Fit</h5>
+                <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                    {% if report.match_percentage >= 85 %}
+                        Strong Match
+                    {% elif report.match_percentage >= 65 %}
+                        Good Alignment
+                    {% else %}
+                        Low Alignment
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+
+        <!-- Estimated Learning Time -->
+        {% set task_count = report.learning_roadmap|length %}
+        {% set est_hours = task_count * 5 %}
+        <div class="space-y-1 flex flex-col justify-center">
+            <h5 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Estimated Learning Time</h5>
+            <div class="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <i data-lucide="clock" class="h-4.5 w-4.5 text-indigo-500"></i>
+                <span>~{{ est_hours }} hours of study required</span>
+            </div>
+        </div>
+
+        <!-- Recommended Courses -->
+        <div class="space-y-1 flex flex-col justify-center">
+            <h5 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Recommended Course</h5>
+            <div class="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <i data-lucide="book-open" class="h-4.5 w-4.5 text-emerald-500"></i>
+                <span>IBM Cloud Developer Fundamentals</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Matching Skills vs Missing Skills badges -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 border-b border-slate-100 dark:border-slate-900 pb-8">
+        
+        <!-- Matching skills -->
+        <div class="space-y-3">
+            <h6 class="font-heading text-sm font-bold text-emerald-600 dark:text-emerald-450 uppercase tracking-wider flex items-center gap-1.5">
+                <i data-lucide="check-circle" class="h-5 w-5"></i>
+                Matching Skills
+            </h6>
+            <div class="flex flex-wrap gap-2">
+                {% if report.required_technologies %}
+                    {% for tech in report.required_technologies %}
+                        <span class="inline-flex items-center rounded bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-650 dark:bg-emerald-950/20 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/10">{{ tech }}</span>
+                    {% endfor %}
+                {% else %}
+                    <span class="text-slate-400 text-sm italic">No matching skills found.</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Missing skills -->
+        <div class="space-y-3">
+            <h6 class="font-heading text-sm font-bold text-red-500 uppercase tracking-wider flex items-center gap-1.5">
+                <i data-lucide="alert-circle" class="h-5 w-5"></i>
+                Missing Skills
+            </h6>
+            <div class="flex flex-wrap gap-2">
+                {% if report.missing_skills %}
+                    {% for skill in report.missing_skills %}
+                        <span class="inline-flex items-center rounded bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-650 dark:bg-red-950/20 dark:text-red-400 border border-red-100 dark:border-red-900/10">{{ skill }}</span>
+                    {% endfor %}
+                {% else %}
+                    <span class="text-emerald-600 text-sm font-semibold inline-flex items-center gap-1.5"><i data-lucide="check" class="h-4 w-4"></i> All requirements met.</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Suggestions block -->
+    <div class="space-y-4 border-b border-slate-100 dark:border-slate-900 pb-8">
+        <h5 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Resume Alignment Suggestions</h5>
+        <ul class="space-y-3.5 text-base sm:text-[17px] text-slate-650 dark:text-slate-350">
+            {% if report.improvement_suggestions %}
+                {% for sug in report.improvement_suggestions %}
+                    <li class="flex items-start gap-2.5">
+                        <span class="mt-2 flex h-2 w-2 flex-shrink-0 rounded-full bg-emerald-500"></span>
+                        <span class="leading-relaxed">{{ sug }}</span>
+                    </li>
+                {% endfor %}
+            {% else %}
+                <li class="text-slate-400 italic">No specific suggestions returned.</li>
+            {% endif %}
+        </ul>
+    </div>
+
+    <!-- Upskilling Learning Timeline -->
+    <div class="space-y-6">
+        <h5 class="font-heading text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider flex items-center gap-2">
+            <i data-lucide="route" class="h-5.5 w-5.5 text-emerald-500"></i>
+            Upskilling Learning Timeline
+        </h5>
+        
+        <div class="relative pl-6 border-l border-slate-100 dark:border-slate-800 space-y-6">
+            {% for item in report.learning_roadmap %}
+            <div class="relative space-y-1.5">
+                <!-- Dot marker -->
+                <span class="absolute -left-[31px] top-1.5 flex h-[11px] w-[11px] items-center justify-center rounded-full bg-emerald-500 ring-4 ring-white dark:ring-[#07080a]"></span>
+                
+                <div class="rounded-lg border border-slate-100 bg-slate-50/50 p-5 dark:border-slate-900 dark:bg-slate-900/10 w-100 space-y-2">
+                    <div class="flex items-center justify-between gap-3 flex-wrap">
+                        <h6 class="font-heading text-sm sm:text-base font-bold text-slate-800 dark:text-slate-250">Phase {{ loop.index }}</h6>
+                        <span class="inline-flex items-center rounded-full bg-indigo-50 px-2.5 py-0.5 text-[10px] font-bold text-indigo-650 dark:bg-indigo-950/20 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/10">Target Stage</span>
+                    </div>
+                    <p class="text-sm sm:text-base text-slate-600 dark:text-slate-450 leading-relaxed">{{ item }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const progressRing = document.getElementById("match-progress-ring");
+        if (progressRing) {
+            const score = {{ report.match_percentage }};
+            const circumference = 169.6; // 2 * Math.PI * 27 = 169.6
+            const offset = circumference - (score / 100) * circumference;
+            setTimeout(() => {
+                progressRing.style.strokeDashoffset = offset;
+            }, 300);
+        }
+    });
+</script>
+{% endblock %}

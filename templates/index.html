@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Interview Trainer Agent{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-3xl py-12 space-y-12">
+    
+    <!-- Welcome Hero Header -->
+    <div class="text-center space-y-4">
+        <h1 class="font-heading text-5xl lg:text-[60px] font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.05]">
+            Master the art of the <span class="text-emerald-500">technical interview</span>
+        </h1>
+        <p class="mx-auto max-w-xl text-base sm:text-[17px] text-slate-500 dark:text-slate-400 font-normal leading-relaxed">
+            Generate highly customized technical roadmap roadmaps, study cultural HR fit guidelines, and simulated mock loops backed by IBM watsonx.ai.
+        </p>
+    </div>
+
+    <!-- Credentials Warning Alert (Notion styled) -->
+    {% if not watsonx_configured %}
+    <div class="rounded-xl border border-amber-200 bg-amber-50/50 p-5 text-sm dark:border-amber-900/30 dark:bg-amber-950/20">
+        <div class="flex gap-3">
+            <i data-lucide="alert-triangle" class="h-5 w-5 text-amber-500 flex-shrink-0"></i>
+            <div>
+                <h5 class="font-heading font-bold text-amber-805 dark:text-amber-300 mb-1 text-sm">watsonx.ai Credentials Missing</h5>
+                <p class="text-amber-700 dark:text-amber-400 font-normal leading-relaxed">
+                    Please define your <code class="bg-amber-100/80 px-1 py-0.5 rounded font-mono text-xs dark:bg-amber-900/50">WATSONX_APIKEY</code> and <code class="bg-amber-100/80 px-1 py-0.5 rounded font-mono text-xs dark:bg-amber-900/50">WATSONX_PROJECT_ID</code> in your <code class="bg-amber-100/80 px-1 py-0.5 rounded font-mono text-xs dark:bg-amber-900/50">.env</code> configuration file.
+                </p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Main Workspace form (Flat shadcn/ui panel) -->
+    <div class="rounded-xl border border-slate-200 bg-white p-8 sm:p-10 dark:border-slate-800 dark:bg-slate-950 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+        <form id="trainer-form" action="{{ url_for('home') }}" method="POST" enctype="multipart/form-data" class="space-y-8">
+            
+            <!-- Resume PDF Upload -->
+            <div class="space-y-2">
+                <label class="block text-[13px] font-bold text-slate-405 dark:text-slate-500 uppercase tracking-wider">Upload Resume</label>
+                
+                <div id="upload-zone" class="group flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-200 hover:border-emerald-500 dark:border-slate-800 dark:hover:border-emerald-500 bg-white hover:bg-slate-50/50 p-10 text-center cursor-pointer transition-all duration-200 dark:bg-slate-950 dark:hover:bg-slate-900/30">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-50 text-slate-500 dark:bg-slate-900 group-hover:scale-105 transition-transform mb-3">
+                        <i data-lucide="upload-cloud" class="h-6 w-6"></i>
+                    </div>
+                    <h6 class="text-base font-bold text-slate-800 dark:text-slate-250 mb-1">Drag & drop your PDF resume here</h6>
+                    <p class="text-xs sm:text-sm text-slate-400">or click here to search your local directory</p>
+                    <input type="file" id="resume-input" name="resume" accept="application/pdf" class="hidden" required>
+                </div>
+                
+                <!-- File selected preview -->
+                <div id="file-info" class="hidden mt-3 rounded-lg border border-slate-200 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/20 p-4 transition-all">
+                    <div class="flex items-center justify-between gap-4">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <i data-lucide="check-circle" class="h-5 w-5 text-emerald-500 flex-shrink-0"></i>
+                            <span class="text-sm sm:text-base text-slate-850 dark:text-slate-200 font-semibold truncate" id="file-name-text">filename.pdf</span>
+                        </div>
+                        <button type="button" class="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-red-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-850 dark:hover:text-red-450 shadow-sm transition-all" onclick="document.getElementById('resume-input').value=''; document.getElementById('file-info').classList.add('hidden');">
+                            <i data-lucide="trash-2" class="h-3.5 w-3.5"></i>
+                            <span>Remove</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Parameters Grid (2 columns) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                    <label for="job_role" class="block text-[13px] font-bold text-slate-405 dark:text-slate-500 uppercase tracking-wider">Target Job Role</label>
+                    <select id="job_role" name="job_role" class="w-full bg-white border border-slate-200 rounded-lg px-4 py-3 text-base text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 dark:bg-slate-900 dark:border-slate-800 dark:text-white transition-all font-medium" required>
+                        <option value="" disabled selected>Choose a job role...</option>
+                        <option value="Software Engineer">Software Engineer</option>
+                        <option value="Backend Engineer">Backend Engineer</option>
+                        <option value="Frontend Developer">Frontend Developer</option>
+                        <option value="Full Stack Developer">Full Stack Developer</option>
+                        <option value="Data Scientist">Data Scientist</option>
+                        <option value="DevOps Engineer">DevOps Engineer</option>
+                        <option value="QA Engineer">QA Engineer</option>
+                        <option value="Database Administrator">Database Administrator</option>
+                    </select>
+                </div>
+                
+                <div class="space-y-2">
+                    <label for="experience_level" class="block text-[13px] font-bold text-slate-455 dark:text-slate-500 uppercase tracking-wider">Experience Level</label>
+                    <select id="experience_level" name="experience_level" class="w-full bg-white border border-slate-200 rounded-lg px-4 py-3 text-base text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 dark:bg-slate-900 dark:border-slate-800 dark:text-white transition-all font-medium" required>
+                        <option value="" disabled selected>Choose experience...</option>
+                        <option value="Entry Level / Fresher">Entry Level / Fresher</option>
+                        <option value="Junior (1-2 years)">Junior (1-2 years)</option>
+                        <option value="Mid-Level (3-5 years)">Mid-Level (3-5 years)</option>
+                        <option value="Senior (5+ years)">Senior (5+ years)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                    <label for="company" class="block text-[13px] font-bold text-slate-455 dark:text-slate-500 uppercase tracking-wider">Target Company</label>
+                    <select id="company" name="company" class="w-full bg-white border border-slate-200 rounded-lg px-4 py-3 text-base text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 dark:bg-slate-900 dark:border-slate-800 dark:text-white transition-all font-medium" required>
+                        <option value="IBM" selected>IBM</option>
+                        <option value="Google">Google</option>
+                        <option value="Microsoft">Microsoft</option>
+                        <option value="Amazon">Amazon</option>
+                        <option value="TCS">TCS</option>
+                        <option value="Infosys">Infosys</option>
+                        <option value="Wipro">Wipro</option>
+                        <option value="Accenture">Accenture</option>
+                        <option value="Capgemini">Capgemini</option>
+                    </select>
+                </div>
+
+                <div class="space-y-2">
+                    <label for="difficulty" class="block text-[13px] font-bold text-slate-455 dark:text-slate-500 uppercase tracking-wider">Difficulty Level</label>
+                    <select id="difficulty" name="difficulty" class="w-full bg-white border border-slate-200 rounded-lg px-4 py-3 text-base text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 dark:bg-slate-900 dark:border-slate-800 dark:text-white transition-all font-medium" required>
+                        <option value="Easy">Easy</option>
+                        <option value="Medium" selected>Medium</option>
+                        <option value="Hard">Hard</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Submit Button (Vercel flat black style) -->
+            <div class="pt-2">
+                <button type="submit" class="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-5 py-3 text-base font-bold text-white shadow-sm hover:bg-slate-850 dark:bg-emerald-500 dark:hover:bg-emerald-600 disabled:opacity-50 disabled:pointer-events-none transition-all" {% if not watsonx_configured %}disabled{% endif %}>
+                    <i data-lucide="zap" class="h-4.5 w-4.5 fill-white"></i>
+                    <span>Generate Prep Dashboard</span>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Product Features Card Row below -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16 pt-10 border-t border-slate-100 dark:border-slate-900">
+        <div class="space-y-3">
+            <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-500 dark:bg-emerald-950/45">
+                <i data-lucide="cpu" class="h-5 w-5"></i>
+            </div>
+            <h5 class="text-base font-bold text-slate-800 dark:text-slate-250">AI Interview Coach</h5>
+            <p class="text-xs sm:text-sm text-slate-450 leading-relaxed font-normal">Generate custom, structured interview prep guides based on your exact resume and target role profiles.</p>
+        </div>
+        <div class="space-y-3">
+            <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-500 dark:bg-indigo-950/45">
+                <i data-lucide="sliders" class="h-5 w-5"></i>
+            </div>
+            <h5 class="text-base font-bold text-slate-800 dark:text-slate-250">Career Match</h5>
+            <p class="text-xs sm:text-sm text-slate-455 leading-relaxed font-normal">Directly compare your technical resume context against JDs to calculate matching stats and identify gaps.</p>
+        </div>
+        <div class="space-y-3">
+            <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-500 dark:bg-amber-950/45">
+                <i data-lucide="play-circle" class="h-5 w-5"></i>
+            </div>
+            <h5 class="text-base font-bold text-slate-800 dark:text-slate-250">Mock Simulator</h5>
+            <p class="text-xs sm:text-sm text-slate-455 leading-relaxed font-normal">Assess your response delivery patterns in an interactive evaluated text console powered by Granite.</p>
+        </div>
+    </div>
+
+</div>
+
+<!-- Stepper Loading Overlay -->
+<div id="loading-overlay" style="display: none;" class="fixed inset-0 z-[100] bg-slate-950/98 flex flex-col items-center justify-center p-4">
+    <div class="text-center w-full max-w-sm">
+        <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-950 text-emerald-500 mx-auto mb-4 border border-emerald-900/30">
+            <i data-lucide="loader" class="h-6 w-6 animate-spin"></i>
+        </div>
+        
+        <h4 class="font-heading text-lg font-bold text-white mb-1">Processing Analysis</h4>
+        <p class="text-xs text-slate-400 mb-6">Please wait while our RAG agent structures your roadmap.</p>
+        
+        <!-- Stepper steps list -->
+        <div class="space-y-3.5 text-left border border-slate-800 bg-slate-900/30 rounded-lg p-5">
+            <div class="flex items-center gap-3 opacity-40 transition-opacity duration-300" id="step-1">
+                <div class="stepper-indicator flex h-5 w-5 items-center justify-center rounded-full border border-slate-700 text-[10px] font-bold text-slate-400">1</div>
+                <div class="text-sm font-medium text-slate-300 stepper-text">Resume Uploaded</div>
+            </div>
+            <div class="flex items-center gap-3 opacity-40 transition-opacity duration-300" id="step-2">
+                <div class="stepper-indicator flex h-5 w-5 items-center justify-center rounded-full border border-slate-700 text-[10px] font-bold text-slate-400">2</div>
+                <div class="text-sm font-medium text-slate-300 stepper-text">Parsing Resume</div>
+            </div>
+            <div class="flex items-center gap-3 opacity-40 transition-opacity duration-300" id="step-3">
+                <div class="stepper-indicator flex h-5 w-5 items-center justify-center rounded-full border border-slate-700 text-[10px] font-bold text-slate-400">3</div>
+                <div class="text-sm font-medium text-slate-300 stepper-text">Extracting Skills</div>
+            </div>
+            <div class="flex items-center gap-3 opacity-40 transition-opacity duration-300" id="step-4">
+                <div class="stepper-indicator flex h-5 w-5 items-center justify-center rounded-full border border-slate-700 text-[10px] font-bold text-slate-400">4</div>
+                <div class="text-sm font-medium text-slate-300 stepper-text">Searching Knowledge Base</div>
+            </div>
+            <div class="flex items-center gap-3 opacity-40 transition-opacity duration-300" id="step-5">
+                <div class="stepper-indicator flex h-5 w-5 items-center justify-center rounded-full border border-slate-700 text-[10px] font-bold text-slate-400">5</div>
+                <div class="text-sm font-medium text-slate-300 stepper-text">Generating AI Interview</div>
+            </div>
+            <div class="flex items-center gap-3 opacity-40 transition-opacity duration-300" id="step-6">
+                <div class="stepper-indicator flex h-5 w-5 items-center justify-center rounded-full border border-slate-700 text-[10px] font-bold text-slate-400">6</div>
+                <div class="text-sm font-medium text-slate-300 stepper-text">Preparing Dashboard</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

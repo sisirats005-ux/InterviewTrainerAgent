@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block title %}Resume vs JD Matcher - Interview Trainer Agent{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-3xl py-12 space-y-12">
+    
+    <!-- Header title -->
+    <div class="text-center space-y-4">
+        <h1 class="font-heading text-3xl sm:text-[40px] font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight">
+            Resume vs <span class="text-emerald-500">Job Description Matcher</span>
+        </h1>
+        <p class="mx-auto max-w-xl text-base sm:text-[17px] text-slate-500 dark:text-slate-400 font-normal leading-relaxed">
+            Compare candidate technical profiles directly against target roles. Semantic scoring, gap extraction, and roadmaps.
+        </p>
+        <div class="mt-4 flex items-center justify-center gap-2">
+            <span class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
+                <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                Similarity scoring
+            </span>
+            <span class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
+                <span class="h-1.5 w-1.5 rounded-full bg-indigo-500"></span>
+                Skill Roadmaps
+            </span>
+        </div>
+    </div>
+
+    <!-- Credentials Alert -->
+    {% if not watsonx_configured %}
+    <div class="rounded-xl border border-amber-200 bg-amber-50/50 p-5 text-sm dark:border-amber-900/30 dark:bg-amber-950/20">
+        <div class="flex gap-3">
+            <i data-lucide="alert-triangle" class="h-5 w-5 text-amber-500 flex-shrink-0"></i>
+            <div>
+                <h5 class="font-heading font-bold text-amber-805 dark:text-amber-300 mb-1 text-sm">watsonx.ai Credentials Missing</h5>
+                <p class="text-amber-700 dark:text-amber-400 font-normal leading-relaxed">
+                    Please define your <code class="bg-amber-100/80 px-1 py-0.5 rounded font-mono text-xs dark:bg-amber-900/50">WATSONX_APIKEY</code> and <code class="bg-amber-100/80 px-1 py-0.5 rounded font-mono text-xs dark:bg-amber-900/50">WATSONX_PROJECT_ID</code> in your <code class="bg-amber-100/80 px-1 py-0.5 rounded font-mono text-xs dark:bg-amber-900/50">.env</code> configuration file. Matching is disabled.
+                </p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Double Upload Box Grid -->
+    <div class="rounded-xl border border-slate-200 bg-white p-8 sm:p-10 dark:border-slate-800 dark:bg-slate-950 shadow-sm">
+        <form id="match-form" action="{{ url_for('jd_match') }}" method="POST" enctype="multipart/form-data" class="space-y-8">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Resume PDF Upload Column -->
+                <div class="space-y-3">
+                    <label class="block text-[15px] font-bold text-slate-850 dark:text-slate-200 flex items-center gap-2">
+                        <i data-lucide="file-text" class="h-4.5 w-4.5 text-emerald-500"></i>
+                        1. Upload Your Resume
+                    </label>
+                    <div id="resume-zone" class="group flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-200 hover:border-emerald-500 dark:border-slate-805 dark:hover:border-emerald-500 bg-white hover:bg-slate-50/50 p-8 text-center cursor-pointer transition-all duration-200 dark:bg-slate-950 dark:hover:bg-slate-900/40">
+                        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-500 dark:bg-emerald-950/40 mb-3">
+                            <i data-lucide="upload-cloud" class="h-5.5 w-5.5"></i>
+                        </div>
+                        <h6 class="text-base font-bold text-slate-800 dark:text-slate-200 mb-1">Drag & drop your PDF resume</h6>
+                        <p class="text-xs sm:text-sm text-slate-400 mb-3">or browse files</p>
+                        <span class="inline-flex items-center rounded bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-500 dark:bg-slate-900 dark:text-slate-400 border border-slate-200 dark:border-slate-800">PDF ONLY</span>
+                        <input type="file" id="resume-file" name="resume" accept="application/pdf" class="hidden" required>
+                    </div>
+                    
+                    <div id="resume-file-info" class="hidden rounded-lg border border-slate-100 bg-slate-50/50 p-4 text-sm sm:text-base text-slate-800 dark:border-slate-850 dark:bg-slate-900/30 dark:text-slate-200">
+                        <span class="flex items-center gap-2 truncate"><i data-lucide="check-circle-2" class="h-4.5 w-4.5 text-emerald-500 flex-shrink-0"></i>Resume: <strong id="resume-file-name" class="truncate font-semibold">filename.pdf</strong></span>
+                    </div>
+                </div>
+
+                <!-- Job Description Upload Column -->
+                <div class="space-y-3">
+                    <label class="block text-[15px] font-bold text-slate-850 dark:text-slate-200 flex items-center gap-2">
+                        <i data-lucide="briefcase" class="h-4.5 w-4.5 text-emerald-500"></i>
+                        2. Upload Job Description
+                    </label>
+                    <div id="jd-zone" class="group flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-200 hover:border-emerald-500 dark:border-slate-805 dark:hover:border-emerald-500 bg-white hover:bg-slate-50/50 p-8 text-center cursor-pointer transition-all duration-200 dark:bg-slate-950 dark:hover:bg-slate-900/40">
+                        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-500 dark:bg-emerald-950/40 mb-3">
+                            <i data-lucide="file" class="h-5.5 w-5.5"></i>
+                        </div>
+                        <h6 class="text-base font-bold text-slate-800 dark:text-slate-200 mb-1">Drag & drop Job Description</h6>
+                        <p class="text-xs sm:text-sm text-slate-400 mb-3">or browse files</p>
+                        <span class="inline-flex items-center rounded bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-500 dark:bg-slate-900 dark:text-slate-400 border border-slate-200 dark:border-slate-800">PDF, DOCX, or TXT</span>
+                        <input type="file" id="jd-file" name="jd" accept=".pdf,.docx,.txt" class="hidden" required>
+                    </div>
+                    
+                    <div id="jd-file-info" class="hidden rounded-lg border border-slate-100 bg-slate-50/50 p-4 text-sm sm:text-base text-slate-850 dark:border-slate-850 dark:bg-slate-900/30 dark:text-slate-200">
+                        <span class="flex items-center gap-2 truncate"><i data-lucide="check-circle-2" class="h-4.5 w-4.5 text-emerald-500 flex-shrink-0"></i>JD: <strong id="jd-file-name" class="truncate font-semibold">filename.txt</strong></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Action Button -->
+            <div class="pt-4">
+                <button type="submit" class="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-500 px-5 py-3 text-base font-bold text-white shadow hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 disabled:opacity-50 disabled:pointer-events-none transition-all" {% if not watsonx_configured %}disabled{% endif %}>
+                    <i data-lucide="refresh-cw" class="h-4.5 w-4.5"></i>
+                    <span>Calculate Match Alignment</span>
+                </button>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+<!-- Match Loading Overlay -->
+<div id="loading-overlay" style="display: none;" class="fixed inset-0 z-[100] bg-slate-950/98 flex flex-col items-center justify-center p-4">
+    <div class="text-center w-full max-w-sm">
+        <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-950 text-emerald-500 mx-auto mb-4 border border-emerald-900/30">
+            <i data-lucide="loader" class="h-6 w-6 animate-spin"></i>
+        </div>
+        <h4 class="font-heading text-lg font-bold text-white mb-1">Analyzing Resume Compatibility</h4>
+        <p class="text-xs text-slate-400 mb-6 font-medium">Comparing experience profiles and technical skill gaps...</p>
+        
+        <div class="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+            <div class="h-full bg-emerald-500 rounded-full animate-pulse" style="width: 100%;"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const resumeZone = document.getElementById("resume-zone");
+        const resumeInput = document.getElementById("resume-file");
+        const resumeInfo = document.getElementById("resume-file-info");
+        const resumeName = document.getElementById("resume-file-name");
+
+        const jdZone = document.getElementById("jd-zone");
+        const jdInput = document.getElementById("jd-file");
+        const jdInfo = document.getElementById("jd-file-info");
+        const jdName = document.getElementById("jd-file-name");
+        
+        const form = document.getElementById("match-form");
+
+        function setupUpload(zone, input, info, name, allowed_exts) {
+            zone.addEventListener("click", () => input.click());
+            
+            zone.addEventListener("dragover", (e) => {
+                e.preventDefault();
+                zone.classList.add("bg-slate-50", "border-emerald-500");
+            });
+            
+            zone.addEventListener("dragleave", () => zone.classList.remove("bg-slate-50", "border-emerald-500"));
+            
+            zone.addEventListener("drop", (e) => {
+                e.preventDefault();
+                zone.classList.remove("bg-slate-50", "border-emerald-500");
+                if (e.dataTransfer.files.length) {
+                    input.files = e.dataTransfer.files;
+                    validateAndShow(input.files[0], info, name, allowed_exts, input);
+                }
+            });
+            
+            input.addEventListener("change", () => {
+                if (input.files.length) {
+                    validateAndShow(input.files[0], info, name, allowed_exts, input);
+                }
+            });
+        }
+
+        function validateAndShow(file, info, name, allowed_exts, input) {
+            const ext = file.name.split('.').pop().toLowerCase();
+            if (!allowed_exts.includes(ext)) {
+                alert(`Error: Only files with extensions (${allowed_exts.join(", ")}) are supported!`);
+                input.value = "";
+                info.classList.add("hidden");
+                return;
+            }
+            if (file.size > 4 * 1024 * 1024) {
+                alert("Error: File exceeds the 4MB limit.");
+                input.value = "";
+                info.classList.add("hidden");
+                return;
+            }
+            name.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+            info.classList.remove("hidden");
+        }
+
+        setupUpload(resumeZone, resumeInput, resumeInfo, resumeName, ["pdf"]);
+        setupUpload(jdZone, jdInput, jdInfo, jdName, ["pdf", "txt", "docx"]);
+
+        if (form) {
+            form.addEventListener("submit", function(e) {
+                if (!resumeInput.files.length || !jdInput.files.length) {
+                    alert("Please upload both files.");
+                    e.preventDefault();
+                    return;
+                }
+                const overlay = document.getElementById("loading-overlay");
+                if (overlay) overlay.style.display = "flex";
+            });
+        }
+    });
+</script>
+{% endblock %}

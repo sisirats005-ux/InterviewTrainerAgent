@@ -1,0 +1,31 @@
+=== PYTHON TECHNICAL INTERVIEW KNOWLEDGE BASE ===
+
+--- TOPIC: CORE DATA STRUCTURES ---
+- Lists vs. Tuples: Lists are mutable (dynamic sizing, slower, square brackets `[]`), whereas Tuples are immutable (fixed sizing, faster, parentheses `()`). Tuples can be used as dictionary keys if they contain only hashable elements.
+- Sets: Unordered collections of unique, hashable elements. Operations like union, intersection, and difference are highly optimized (average O(1) lookup).
+- Dictionaries: Key-value pairs stored using a hash table. Keys must be immutable and hashable (strings, numbers, tuples of immutables). Lookups, insertions, and deletions are O(1) on average.
+
+--- TOPIC: OBJECT-ORIENTED PROGRAMMING (OOP) ---
+- Inheritance: Ability of a class to inherit attributes and methods from a parent class. Supports single and multiple inheritance. Use `super().__init__()` to call parent constructors.
+- Polymorphism: Standard interfaces can be implemented by different classes. Methods with the same name can behave differently depending on the object.
+- Encapsulation: Restricting direct access to objects' state. Use single underscore `_variable` for protected access and double underscore `__variable` for private access (triggers name mangling).
+- Abstraction: Hiding implementation details and showing only functionality. Use `abc` module with `@abstractmethod` decorator to define abstract base classes.
+
+--- TOPIC: DECORATORS & METAPROGRAMMING ---
+- Decorator: A function that takes another function as an argument, extends its behavior without modifying it, and returns the modified function. Uses `@decorator_name` syntax.
+- Closure: A nested function that retains access to variables from its enclosing scope even after the outer function has finished executing.
+- Generators: Functions that yield values one at a time using the `yield` keyword. They maintain local state and use lazy evaluation, making them memory efficient for large datasets.
+
+--- TOPIC: MEMORY & CONCURRENCY ---
+- Garbage Collection: Python uses reference counting as its primary garbage collection mechanism. When an object's reference count drops to 0, it is immediately deallocated. Python also uses a cyclic garbage collector (`gc` module) to detect and clean up reference cycles.
+- Global Interpreter Lock (GIL): A mutex that prevents multiple native threads from executing Python bytecodes at once. This makes Python thread-safe but limits CPU-bound multithreading. Use `multiprocessing` for CPU-bound tasks and `asyncio` or `threading` for I/O-bound tasks.
+
+--- TECHNICAL INTERVIEW QUESTIONS & MODEL ANSWERS ---
+Q: What is the difference between deepcopy and shallowcopy?
+A: A shallow copy constructs a new compound object and then inserts references into it to the objects found in the original. Changes to nested objects in the copy will affect the original. A deep copy constructs a new compound object and then, recursively, inserts copies into it of the objects found in the original. Changes to the copy do not affect the original. Use the `copy` module.
+
+Q: Explain Python's GIL and its impact.
+A: The GIL is a mechanism in CPython (default python implementation) that ensures only one thread executes Python bytecode at a time. For CPU-bound tasks, multithreading is bottlenecked because threads wait for the GIL. The solution is using the `multiprocessing` module (runs separate Python interpreter instances on different cores) or C extensions. For I/O-bound tasks, multithreading and `asyncio` remain highly effective because the GIL is released during network or file operations.
+
+Q: How do you manage resources and avoid memory leaks in Python?
+A: Use context managers (the `with` statement) for handling resources like files, database connections, and locks. Context managers guarantee that resources are cleaned up or closed, even if exceptions are raised. Implement them using the `__enter__` and `__exit__` magic methods in a class, or the `@contextmanager` decorator from `contextlib`.

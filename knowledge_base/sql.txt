@@ -1,0 +1,39 @@
+=== SQL & DATABASE TECHNICAL INTERVIEW KNOWLEDGE BASE ===
+
+--- TOPIC: JOIN OPERATIONS ---
+- INNER JOIN: Returns records that have matching values in both tables.
+- LEFT JOIN (or LEFT OUTER JOIN): Returns all records from the left table, and the matched records from the right table. Fill with NULLs if no match.
+- RIGHT JOIN: Returns all records from the right table, and the matched records from the left table. Fill with NULLs if no match.
+- FULL OUTER JOIN: Returns all records when there is a match in either left or right table.
+- CROSS JOIN: Returns the Cartesian product of the two tables (combines all rows of left table with all rows of right table).
+
+--- TOPIC: INDEXING & PERFORMANCE ---
+- Indexes: Data structures (typically B-Trees) that improve the speed of data retrieval operations on a table at the cost of additional writes and storage space.
+- Clustered Index: Determines the physical order of data in the table. There can only be one clustered index per table (typically the Primary Key).
+- Non-Clustered Index: Contains a pointer to the physical location of the row. You can have multiple non-clustered indexes.
+- Index Scan vs. Index Seek: A seek traverses the B-Tree directly to find specific rows (fast), while a scan traverses the entire leaf level of the index (slower).
+
+--- TOPIC: ACID PROPERTIES ---
+- Atomicity: Ensures that all operations within a transaction are completed successfully; if any operation fails, the entire transaction is rolled back (All-or-Nothing).
+- Consistency: Ensures that a database transition takes it from one valid state to another, maintaining all schema constraints, triggers, and rules.
+- Isolation: Ensures that concurrent execution of transactions leaves the database in the same state as if they were executed sequentially. Prevents dirty reads, non-repeatable reads, and phantom reads.
+- Durability: Guarantees that once a transaction has been committed, it will remain committed even in the event of a power loss, crash, or system failure.
+
+--- TOPIC: WINDOW FUNCTIONS ---
+- Window Functions: Perform calculations across a set of table rows that are somehow related to the current row, without collapsing them into a single row. Syntax: `FUNCTION() OVER (PARTITION BY col1 ORDER BY col2)`.
+- ROW_NUMBER(): Assigns a unique sequential integer to rows starting at 1.
+- RANK(): Assigns rank with gaps. If two rows share rank 2, the next rank is 4.
+- DENSE_RANK(): Assigns rank without gaps. If two rows share rank 2, the next rank is 3.
+
+--- TECHNICAL INTERVIEW QUESTIONS & MODEL ANSWERS ---
+Q: What is the difference between WHERE and HAVING clauses?
+A: The `WHERE` clause is used to filter rows before any groupings are made (cannot contain aggregate functions). The `HAVING` clause is used to filter groups created by the `GROUP BY` clause, meaning it is executed after groupings and can contain aggregate functions (e.g. `HAVING COUNT(id) > 5`).
+
+Q: Explain the different levels of Database Normalization.
+A: Normalization reduces data redundancy and improves data integrity.
+1NF (First Normal Form): All columns contain atomic (indivisible) values, and each record is unique.
+2NF (Second Normal Form): Meets 1NF, and all non-key attributes must be fully functionally dependent on the entire primary key (eliminates partial dependencies).
+3NF (Third Normal Form): Meets 2NF, and there are no transitive dependencies (non-key columns must not depend on other non-key columns).
+
+Q: How do you optimize a slow running SQL query?
+A: 1. Use `EXPLAIN` or `EXPLAIN ANALYZE` to inspect the query execution plan. 2. Verify that appropriate indexes are created on columns used in `WHERE`, `JOIN`, `ORDER BY`, and `GROUP BY` clauses. 3. Avoid `SELECT *`; only retrieve the required columns. 4. Avoid wildcards at the beginning of `LIKE` search strings (e.g., `%value` prevents index usage). 5. Replace subqueries with `JOIN` operations or Common Table Expressions (CTEs) if it improves the execution plan. 6. Check for database statistics update or lock contention.

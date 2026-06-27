@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Error - Interview Trainer Agent{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-5">
+    <div class="col-md-8 col-lg-6 text-center">
+        <div class="card-carbon p-5 border-start border-danger border-4 bg-white border-top border-bottom border-end border-secondary border-opacity-10 shadow">
+            <i class="fa-solid fa-triangle-exclamation text-danger display-3 mb-4"></i>
+            <h2 class="font-heading text-dark fw-bold mb-3">An Error Occurred</h2>
+            <p class="text-secondary font-inter mb-4">{{ error_message }}</p>
+            
+            <div class="d-flex justify-content-center gap-3">
+                <a href="{{ url_for('home') }}" class="btn btn-carbon rounded-pill px-4">
+                    <i class="fa-solid fa-house me-1"></i> Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

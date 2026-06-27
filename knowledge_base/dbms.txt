@@ -1,0 +1,37 @@
+=== DBMS (DATABASE MANAGEMENT SYSTEMS) TECHNICAL INTERVIEW KNOWLEDGE BASE ===
+
+--- TOPIC: RELATIONAL (SQL) VS. NOSQL ---
+- Relational Databases (SQL): Store data in tables with predefined schemas. Highly structured. Good for complex queries, transactions (ACID compliance). Examples: PostgreSQL, MySQL, Oracle.
+- NoSQL Databases: Schema-less or flexible schema. Designed for horizontal scaling and high performance.
+  - Document Stores: Data stored in JSON-like documents. E.g., MongoDB.
+  - Key-Value Stores: Simple hash tables. E.g., Redis, DynamoDB.
+  - Wide-Column Stores: Tables with rows containing dynamic column families. E.g., Cassandra.
+  - Graph Databases: Store nodes (entities) and edges (relationships). E.g., Neo4j.
+
+--- TOPIC: CAP THEOREM ---
+- CAP Theorem states that a distributed system can deliver at most two of the following three guarantees:
+  - Consistency: Every read receives the most recent write or an error.
+  - Availability: Every request receives a non-error response, without guarantee that it contains the most recent write.
+  - Partition Tolerance: The system continues to operate despite an arbitrary number of messages being dropped or delayed by the network between nodes.
+- Since network partitions are inevitable in real-world distributed systems, databases must choose between Consistency (CP) and Availability (AP) when a partition occurs.
+
+--- TOPIC: SHARDING, PARTITIONING & REPLICATION ---
+- Horizontal Partitioning (Sharding): Splitting rows of a table across multiple database nodes based on a shard key. Used to scale out writes and storage.
+- Vertical Partitioning: Splitting columns of a table across different tables or databases (e.g. putting rarely accessed large text blobs in a separate table).
+- Replication: Copying data across multiple servers to ensure high availability and read scalability.
+  - Master-Slave (Primary-Secondary): All writes go to the primary node, which replicates updates to secondary nodes. Read requests are distributed.
+  - Multi-Master: Multiple nodes accept write requests and synchronize with each other. Requires conflict resolution strategies.
+
+--- TOPIC: CONCURRENCY CONTROL & DEADLOCKS ---
+- Lock-Based Protocols: Using Shared (S) locks for reading and Exclusive (X) locks for writing to ensure serializability.
+- Deadlock: A state where two or more transactions are waiting indefinitely for locks held by each other.
+- Deadlock Handling:
+  - Prevention: Restricting lock requests (e.g. pre-declaring locks, ordering locks, wait-die/wound-wait schemes).
+  - Detection & Recovery: Allowing deadlocks but running detection algorithms (Wait-For Graph cycle detection) and aborting/rolling back a "victim" transaction.
+
+--- TECHNICAL INTERVIEW QUESTIONS & MODEL ANSWERS ---
+Q: Explain the CAP Theorem and give examples of CP and AP databases.
+A: Under a network partition, a CP system (Consistency + Partition Tolerance) rejects or delays writes/reads if it cannot guarantee that all nodes are synced. MongoDB and HBase are examples of CP systems. An AP system (Availability + Partition Tolerance) accepts reads and writes on any available node even if they cannot sync, resulting in temporary stale data. Cassandra and CouchDB are examples of AP systems.
+
+Q: What is the difference between horizontal scaling and vertical scaling?
+A: Vertical scaling (Scaling Up) means adding more power (CPU, RAM, SSD) to an existing single server. It is easy to implement but has hardware limits and introduces a single point of failure. Horizontal scaling (Scaling Out) means adding more machines/nodes to the database cluster and distributing data (sharding) and workload. It scales theoretically without limit but is architecturally complex and requires distributed consistency protocols.

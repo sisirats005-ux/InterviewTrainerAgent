@@ -1,0 +1,356 @@
+{% extends "base.html" %}
+
+{% block title %}Prep Guide - {{ job_role }}{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-4xl space-y-8">
+    
+    <!-- Top Action Header -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-100 dark:border-slate-900 pb-6">
+        <div class="space-y-2">
+            <div class="flex items-center gap-2 text-sm font-medium text-slate-400 dark:text-slate-500">
+                <span>Dashboard</span>
+                <i data-lucide="chevron-right" class="h-3.5 w-3.5"></i>
+                <span class="text-slate-650 dark:text-slate-400 font-semibold">{{ job_role }}</span>
+            </div>
+            <h1 class="font-heading text-3xl sm:text-[40px] font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">{{ job_role }} Preparation Manual</h1>
+            <p class="text-sm text-slate-400 flex items-center gap-1">
+                <i data-lucide="cpu" class="h-4 w-4 text-emerald-500"></i>
+                RAG context generated for {{ company }} • {{ experience_level }} • {{ difficulty }} difficulty
+            </p>
+        </div>
+        
+        <div class="flex flex-wrap items-center gap-2.5">
+            <a href="{{ url_for('download_pdf') }}" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-base font-semibold text-slate-700 hover:bg-slate-50 hover:text-red-500 dark:border-slate-800 dark:bg-[#0c0d12] dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-red-450 shadow-sm transition-all">
+                <i data-lucide="file-down" class="h-4 w-4 text-red-500"></i>
+                <span>PDF Report</span>
+            </a>
+            <a href="{{ url_for('download_json') }}" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-base font-semibold text-slate-700 hover:bg-slate-50 hover:text-amber-500 dark:border-slate-800 dark:bg-[#0c0d12] dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-amber-450 shadow-sm transition-all">
+                <i data-lucide="file-code" class="h-4 w-4 text-amber-500"></i>
+                <span>JSON</span>
+            </a>
+            
+            <div class="h-5 w-px bg-slate-200 dark:bg-slate-800"></div>
+
+            <a href="{{ url_for('home') }}" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-base font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-955 dark:border-slate-800 dark:bg-[#0c0d12] dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-white shadow-sm transition-all">
+                <i data-lucide="refresh-cw" class="h-4 w-4"></i>
+                <span>Reset</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Summary Metrics Grid (4 clean borderless inline columns) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 border-b border-slate-100 dark:border-slate-900 pb-8">
+        
+        <!-- Readiness circular -->
+        <div class="flex items-center gap-4">
+            <div class="relative w-16 h-16 flex-shrink-0">
+                <svg class="w-full h-full -rotate-90">
+                    <defs>
+                        <linearGradient id="indigoCyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#10b981" />
+                            <stop offset="100%" stop-color="#6366f1" />
+                        </linearGradient>
+                    </defs>
+                    <circle class="stroke-slate-100 dark:stroke-slate-800/80 fill-none" stroke-width="5.5" cx="32" cy="32" r="27"></circle>
+                    <circle class="progress fill-none" id="circular-progress-ring" stroke-width="5.5" stroke-linecap="round" stroke="url(#indigoCyanGrad)" cx="32" cy="32" r="27" style="stroke-dasharray: 169.6; stroke-dashoffset: 169.6;"></circle>
+                </svg>
+                <div class="absolute inset-0 flex items-center justify-center font-heading text-base font-extrabold text-slate-855 dark:text-white" id="score-text-val">
+                    {{ report.overall_score }}%
+                </div>
+            </div>
+            <div>
+                <h5 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Readiness Score</h5>
+                <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                    {% if report.overall_score >= 85 %}
+                        High Alignment
+                    {% elif report.overall_score >= 65 %}
+                        Moderate Fit
+                    {% else %}
+                        Gaps Found
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+
+        <!-- ATS Score -->
+        <div class="space-y-2 flex flex-col justify-center">
+            <h5 class="text-xs font-bold text-slate-405 uppercase tracking-wider flex justify-between">
+                <span>ATS Fit</span>
+                <span class="text-slate-700 dark:text-slate-300 font-semibold">{{ report.overall_score }}%</span>
+            </h5>
+            <div class="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-emerald-500 to-indigo-500 rounded-full" style="width: {{ report.overall_score }}%;"></div>
+            </div>
+        </div>
+
+        <!-- Job Match -->
+        {% set ats_score = (report.overall_score - 3) if (report.overall_score - 3) <= 100 else 88 %}
+        <div class="space-y-2 flex flex-col justify-center">
+            <h5 class="text-xs font-bold text-slate-405 uppercase tracking-wider flex justify-between">
+                <span>Job Description Match</span>
+                <span class="text-slate-700 dark:text-slate-300 font-semibold">{{ ats_score }}%</span>
+            </h5>
+            <div class="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-emerald-500 to-indigo-500 rounded-full" style="width: {{ ats_score }}%;"></div>
+            </div>
+        </div>
+
+        <!-- Interview Score -->
+        {% set comm_score = (report.overall_score - 5) if (report.overall_score - 5) <= 100 else 90 %}
+        <div class="space-y-2 flex flex-col justify-center">
+            <h5 class="text-xs font-bold text-slate-405 uppercase tracking-wider flex justify-between">
+                <span>Simulator baseline</span>
+                <span class="text-slate-700 dark:text-slate-300 font-semibold">{{ comm_score }}%</span>
+            </h5>
+            <div class="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-emerald-500 to-indigo-500 rounded-full" style="width: {{ comm_score }}%;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Candidate Profile Details -->
+    <div class="border-b border-slate-100 dark:border-slate-900 pb-8 space-y-4">
+        <h5 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Candidate Profile</h5>
+        <div class="flex flex-wrap items-center gap-x-6 gap-y-3 text-[15px] text-slate-500 dark:text-slate-400 font-medium">
+            <div class="flex items-center gap-2 text-slate-850 dark:text-white font-semibold">
+                <i data-lucide="user" class="h-4.5 w-4.5 text-emerald-500"></i>
+                <span>{{ candidate.name }}</span>
+            </div>
+            {% if candidate.email %}
+            <div class="flex items-center gap-2">
+                <i data-lucide="mail" class="h-4 w-4 text-slate-400"></i>
+                <span>{{ candidate.email }}</span>
+            </div>
+            {% endif %}
+            {% if candidate.phone %}
+            <div class="flex items-center gap-2">
+                <i data-lucide="phone" class="h-4 w-4 text-slate-400"></i>
+                <span>{{ candidate.phone }}</span>
+            </div>
+            {% endif %}
+            {% if candidate.github %}
+            <div class="flex items-center gap-2">
+                <i data-lucide="github" class="h-4 w-4 text-slate-400"></i>
+                <a href="https://{{ candidate.github }}" target="_blank" class="hover:text-emerald-500 transition-colors">{{ candidate.github }}</a>
+            </div>
+            {% endif %}
+            {% if candidate.linkedin %}
+            <div class="flex items-center gap-2">
+                <i data-lucide="linkedin" class="h-4 w-4 text-slate-400"></i>
+                <a href="https://{{ candidate.linkedin }}" target="_blank" class="hover:text-emerald-500 transition-colors">{{ candidate.linkedin }}</a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Skills Badge Node row -->
+        <div class="flex flex-wrap gap-2 pt-2">
+            {% if candidate.skills %}
+                {% for skill in candidate.skills %}
+                    <span class="inline-flex items-center rounded bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-650 dark:bg-slate-900 dark:text-slate-400 border border-slate-100 dark:border-slate-800/80">{{ skill }}</span>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Workspace Tabs Navigation -->
+    <div class="space-y-6">
+        <div class="flex gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200 dark:bg-slate-900 dark:border-slate-800/80 overflow-x-auto" role="tablist">
+            <button class="tab-btn-carbon active flex-1 inline-flex items-center justify-center gap-2 rounded-md py-2.5 px-4 text-[15px] font-bold text-slate-500 transition-all outline-none" id="analysis-tab" data-tab-target="#analysis" role="tab" aria-selected="true">
+                <i data-lucide="bar-chart-3" class="h-4 w-4"></i>
+                <span>Overview</span>
+            </button>
+            <button class="tab-btn-carbon flex-1 inline-flex items-center justify-center gap-2 rounded-md py-2.5 px-4 text-[15px] font-bold text-slate-500 transition-all outline-none" id="tech-tab" data-tab-target="#tech" role="tab" aria-selected="false">
+                <i data-lucide="terminal" class="h-4 w-4"></i>
+                <span>Technical</span>
+            </button>
+            <button class="tab-btn-carbon flex-1 inline-flex items-center justify-center gap-2 rounded-md py-2.5 px-4 text-[15px] font-bold text-slate-500 transition-all outline-none" id="behavioral-tab" data-tab-target="#behavioral" role="tab" aria-selected="false">
+                <i data-lucide="message-square" class="h-4 w-4"></i>
+                <span>Behavioral</span>
+            </button>
+            <button class="tab-btn-carbon flex-1 inline-flex items-center justify-center gap-2 rounded-md py-2.5 px-4 text-[15px] font-bold text-slate-500 transition-all outline-none" id="hr-tab" data-tab-target="#hr" role="tab" aria-selected="false">
+                <i data-lucide="shield-check" class="h-4 w-4"></i>
+                <span>HR Fit</span>
+            </button>
+            <button class="tab-btn-carbon flex-1 inline-flex items-center justify-center gap-2 rounded-md py-2.5 px-4 text-[15px] font-bold text-slate-500 transition-all outline-none" id="roadmap-tab" data-tab-target="#roadmap" role="tab" aria-selected="false">
+                <i data-lucide="milestone" class="h-4 w-4"></i>
+                <span>Learning Roadmap</span>
+            </button>
+        </div>
+
+        <!-- Tab Panels -->
+        <div class="min-h-72">
+            
+            <!-- OVERVIEW: GAP ANALYSIS PANEL -->
+            <div class="tab-pane-carbon active space-y-6" id="analysis" role="tabpanel">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Strengths -->
+                    <div class="space-y-4">
+                        <h6 class="font-heading text-sm font-bold text-emerald-600 dark:text-emerald-450 uppercase tracking-wider flex items-center gap-2">
+                            <i data-lucide="check-circle-2" class="h-5 w-5"></i>
+                            Core Strengths
+                        </h6>
+                        <ul class="space-y-3.5 text-base sm:text-[17px] text-slate-600 dark:text-slate-400">
+                            {% for strength in report.strengths %}
+                                <li class="flex items-start gap-2.5">
+                                    <span class="mt-2 flex h-2 w-2 flex-shrink-0 rounded-full bg-emerald-500"></span>
+                                    <span class="leading-relaxed">{{ strength }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    
+                    <!-- Gaps -->
+                    <div class="space-y-4">
+                        <h6 class="font-heading text-sm font-bold text-red-500 uppercase tracking-wider flex items-center gap-2">
+                            <i data-lucide="alert-circle" class="h-5 w-5"></i>
+                            Identified Gaps
+                        </h6>
+                        <ul class="space-y-3.5 text-base sm:text-[17px] text-slate-650 dark:text-slate-350">
+                            {% for weakness in report.weaknesses %}
+                                <li class="flex items-start gap-2.5">
+                                    <span class="mt-2 flex h-2 w-2 flex-shrink-0 rounded-full bg-red-500"></span>
+                                    <span class="leading-relaxed">{{ weakness }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Missing Skills Inline badges -->
+                {% if report.missing_skills %}
+                <div class="pt-6 border-t border-slate-100 dark:border-slate-900 space-y-3">
+                    <h6 class="font-heading text-sm font-bold text-slate-405 uppercase tracking-wider">Critical Missing Skills</h6>
+                    <div class="flex flex-wrap gap-2">
+                        {% for skill in report.missing_skills %}
+                            <span class="inline-flex items-center rounded-md border border-red-200 bg-red-50/20 px-3 py-1.5 text-sm font-bold text-red-655 dark:border-red-900/10 dark:text-red-400">{{ skill }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Mock Session call to action banner -->
+                <div class="rounded-xl border border-slate-200 bg-slate-50/50 p-6 dark:border-slate-800 dark:bg-slate-900/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+                    <div class="space-y-1">
+                        <h5 class="font-heading text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <i data-lucide="play" class="h-5 w-5 text-emerald-500"></i>
+                            Simulate Your Interview
+                        </h5>
+                        <p class="text-sm text-slate-400">Launch a conversational simulated interview round evaluated dynamically by IBM Granite.</p>
+                    </div>
+                    <form action="{{ url_for('mock_start') }}" method="POST" class="w-full sm:w-auto flex-shrink-0">
+                        <button type="submit" class="w-full inline-flex items-center justify-center gap-1.5 rounded-lg bg-slate-900 px-5 py-3 text-base font-bold text-white shadow-sm hover:bg-slate-850 dark:bg-emerald-500 dark:hover:bg-emerald-600 transition-all">
+                            <span>Launch Simulator</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- TECHNICAL INTERVIEW PANEL -->
+            <div class="tab-pane-carbon hidden space-y-3" id="tech" role="tabpanel">
+                {% for item in report.technical_questions %}
+                <details class="group border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950 rounded-lg overflow-hidden transition-all [&_summary::-webkit-details-marker]:hidden" {% if loop.first %}open{% endif %}>
+                    <summary class="flex items-center justify-between cursor-pointer p-4 select-none font-heading font-bold text-base text-slate-850 dark:text-slate-200 hover:bg-slate-50/50 dark:hover:bg-slate-900/40 leading-relaxed">
+                        <span>Q{{ loop.index }}: {{ item.question }}</span>
+                        <span class="ml-1.5 flex-shrink-0 transition-transform duration-200 group-open:-rotate-180 text-slate-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </span>
+                    </summary>
+                    <div class="border-t border-slate-100 bg-slate-50/30 dark:border-slate-900/20 p-4 font-inter text-base text-slate-600 dark:text-slate-400 leading-relaxed whitespace-pre-wrap"><h6 class="text-sm font-bold text-emerald-600 dark:text-emerald-450 mb-1.5 flex items-center gap-1">Guideline answer:</h6>{{ item.answer }}</div>
+                </details>
+                {% endfor %}
+            </div>
+
+            <!-- BEHAVIORAL INTERVIEW PANEL -->
+            <div class="tab-pane-carbon hidden space-y-3" id="behavioral" role="tabpanel">
+                {% for item in report.behavioral_questions %}
+                <details class="group border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950 rounded-lg overflow-hidden transition-all [&_summary::-webkit-details-marker]:hidden" {% if loop.first %}open{% endif %}>
+                    <summary class="flex items-center justify-between cursor-pointer p-4 select-none font-heading font-bold text-base text-slate-850 dark:text-slate-200 hover:bg-slate-50/50 dark:hover:bg-slate-900/40 leading-relaxed">
+                        <span>Q{{ loop.index }}: {{ item.question }}</span>
+                        <span class="ml-1.5 flex-shrink-0 transition-transform duration-200 group-open:-rotate-180 text-slate-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </span>
+                    </summary>
+                    <div class="border-t border-slate-100 bg-slate-50/30 dark:border-slate-900/20 p-4 font-inter text-base text-slate-600 dark:text-slate-400 leading-relaxed whitespace-pre-wrap"><h6 class="text-sm font-bold text-indigo-600 dark:text-indigo-405 mb-1.5 flex items-center gap-1">STAR Format:</h6>{{ item.answer }}</div>
+                </details>
+                {% endfor %}
+            </div>
+
+            <!-- HR FIT PANEL -->
+            <div class="tab-pane-carbon hidden space-y-3" id="hr" role="tabpanel">
+                {% for item in report.hr_questions %}
+                <details class="group border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950 rounded-lg overflow-hidden transition-all [&_summary::-webkit-details-marker]:hidden" {% if loop.first %}open{% endif %}>
+                    <summary class="flex items-center justify-between cursor-pointer p-4 select-none font-heading font-bold text-base text-slate-855 dark:text-slate-200 hover:bg-slate-50/50 dark:hover:bg-slate-900/40 leading-relaxed">
+                        <span>Q{{ loop.index }}: {{ item.question }}</span>
+                        <span class="ml-1.5 flex-shrink-0 transition-transform duration-200 group-open:-rotate-180 text-slate-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </span>
+                    </summary>
+                    <div class="border-t border-slate-100 bg-slate-50/30 dark:border-slate-900/20 p-4 font-inter text-base text-slate-600 dark:text-slate-400 leading-relaxed whitespace-pre-wrap"><h6 class="text-sm font-bold text-emerald-600 dark:text-emerald-450 mb-1.5 flex items-center gap-1">Cultural fit details:</h6>{{ item.answer }}</div>
+                </details>
+                {% endfor %}
+            </div>
+
+            <!-- LEARNING ROADMAP PANEL -->
+            <div class="tab-pane-carbon hidden space-y-6" id="roadmap" role="tabpanel">
+                <div class="space-y-1.5">
+                    <h6 class="font-heading text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider">Strategic Learning Roadmap</h6>
+                    <p class="text-xs sm:text-sm text-slate-400">Check off completed steps to track upskilling stages.</p>
+                </div>
+                
+                <div class="divide-y divide-slate-100 dark:divide-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden">
+                    {% for rec in report.recommendations %}
+                        <div class="checklist-item flex items-start gap-4 p-5 cursor-pointer hover:bg-slate-50/40 dark:hover:bg-slate-900/10 transition-all">
+                            <div class="mt-1">
+                                <div class="checklist-checkbox h-5 w-5 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 rounded flex items-center justify-center text-white text-[10px] transition-all"></div>
+                            </div>
+                            <div class="space-y-1">
+                                <div class="checklist-title text-sm sm:text-base font-bold text-slate-850 dark:text-slate-200">Task step {{ loop.index }}</div>
+                                <div class="checklist-desc text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed">{{ rec }}</div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Developer Timing Panels under content -->
+    {% if config.DEBUG and metrics %}
+    <div class="rounded-xl border border-slate-200 bg-slate-50/40 p-4 dark:border-slate-850 dark:bg-slate-900/10 space-y-2">
+        <h6 class="font-heading text-xs font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
+            <i data-lucide="gauge" class="h-4 w-4"></i>
+            Developer Timings
+        </h6>
+        <ul class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-[11px] text-slate-500 dark:text-slate-400 font-mono">
+            <li>Resume Parse: <strong class="text-slate-800 dark:text-slate-200">{{ metrics.parse_time }}</strong></li>
+            <li>RAG Retrieval: <strong class="text-slate-800 dark:text-slate-200">{{ metrics.rag_time }}</strong></li>
+            <li>watsonx.ai Gen: <strong class="text-slate-800 dark:text-slate-200">{{ metrics.llm_time }}</strong></li>
+            <li>Total request: <strong class="text-slate-800 dark:text-slate-200">{{ metrics.total_time }}</strong></li>
+        </ul>
+    </div>
+    {% endif %}
+
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const progressRing = document.getElementById("circular-progress-ring");
+        if (progressRing) {
+            const score = {{ report.overall_score }};
+            const circumference = 169.6; // 2 * Math.PI * 27 = 169.6
+            const offset = circumference - (score / 100) * circumference;
+            setTimeout(() => {
+                progressRing.style.strokeDashoffset = offset;
+            }, 300);
+        }
+    });
+</script>
+{% endblock %}
