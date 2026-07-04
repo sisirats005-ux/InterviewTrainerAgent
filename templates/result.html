@@ -39,12 +39,12 @@
         </div>
     </div>
 
-    <!-- Summary Metrics Grid (4 clean borderless inline columns) -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 border-b border-slate-100 dark:border-slate-900 pb-8">
+    <!-- Summary Metrics Grid -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 border-b border-slate-100 dark:border-slate-900 pb-8">
         
-        <!-- Readiness circular -->
+        <!-- Readiness Score Ring -->
         <div class="flex items-center gap-4">
-            <div class="relative w-16 h-16 flex-shrink-0">
+            <div class="relative w-14 h-14 flex-shrink-0">
                 <svg class="w-full h-full -rotate-90">
                     <defs>
                         <linearGradient id="indigoCyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -52,60 +52,66 @@
                             <stop offset="100%" stop-color="#6366f1" />
                         </linearGradient>
                     </defs>
-                    <circle class="stroke-slate-100 dark:stroke-slate-800/80 fill-none" stroke-width="5.5" cx="32" cy="32" r="27"></circle>
-                    <circle class="progress fill-none" id="circular-progress-ring" stroke-width="5.5" stroke-linecap="round" stroke="url(#indigoCyanGrad)" cx="32" cy="32" r="27" style="stroke-dasharray: 169.6; stroke-dashoffset: 169.6;"></circle>
+                    <circle class="stroke-slate-100 dark:stroke-slate-800/80 fill-none" stroke-width="5.5" cx="28" cy="28" r="23"></circle>
+                    <circle class="fill-none progress" id="circular-progress-ring" stroke-width="5.5" stroke-linecap="round" stroke="url(#indigoCyanGrad)" cx="28" cy="28" r="23" style="stroke-dasharray: 144.5; stroke-dashoffset: 144.5;"></circle>
                 </svg>
-                <div class="absolute inset-0 flex items-center justify-center font-heading text-base font-extrabold text-slate-855 dark:text-white" id="score-text-val">
-                    {{ report.overall_score }}%
+                <div class="absolute inset-0 flex items-center justify-center font-heading text-sm font-extrabold text-slate-900 dark:text-white" id="score-text-val">
+                    {% if readiness_result %}{{ readiness_result.overall_score }}{% else %}{{ report.overall_score }}{% endif %}
                 </div>
             </div>
             <div>
-                <h5 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Readiness Score</h5>
-                <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                    {% if report.overall_score >= 85 %}
-                        High Alignment
-                    {% elif report.overall_score >= 65 %}
-                        Moderate Fit
-                    {% else %}
-                        Gaps Found
-                    {% endif %}
+                <h5 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Readiness</h5>
+                <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    {% if readiness_result %}{{ readiness_result.readiness_level }}{% elif report.overall_score >= 85 %}High{% elif report.overall_score >= 65 %}Moderate{% else %}Gaps Found{% endif %}
                 </span>
             </div>
         </div>
 
-        <!-- ATS Score -->
+        <!-- ATS Score (real value from ats_analyzer) -->
         <div class="space-y-2 flex flex-col justify-center">
-            <h5 class="text-xs font-bold text-slate-405 uppercase tracking-wider flex justify-between">
-                <span>ATS Fit</span>
-                <span class="text-slate-700 dark:text-slate-300 font-semibold">{{ report.overall_score }}%</span>
-            </h5>
-            <div class="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                <div class="h-full bg-gradient-to-r from-emerald-500 to-indigo-500 rounded-full" style="width: {{ report.overall_score }}%;"></div>
+            <div class="flex items-center justify-between">
+                <h5 class="text-xs font-bold text-slate-400 uppercase tracking-wider">ATS Score</h5>
+                <span class="text-xs font-bold {% if ats_result and ats_result.ats_score >= 75 %}text-emerald-600 dark:text-emerald-400{% elif ats_result and ats_result.ats_score >= 55 %}text-amber-600{% else %}text-red-500{% endif %}">
+                    {% if ats_result %}{{ ats_result.ats_score }}{% else %}—{% endif %}
+                </span>
             </div>
+            <div class="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-emerald-500 to-indigo-500 rounded-full transition-all duration-1000"
+                    style="width: {% if ats_result %}{{ ats_result.ats_score }}{% else %}0{% endif %}%;"></div>
+            </div>
+            {% if ats_result %}
+            <a href="{{ url_for('ats_score') }}" class="text-[10px] font-bold text-indigo-500 hover:underline">Full Report →</a>
+            {% endif %}
         </div>
 
-        <!-- Job Match -->
-        {% set ats_score = (report.overall_score - 3) if (report.overall_score - 3) <= 100 else 88 %}
+        <!-- Skill Gap score -->
         <div class="space-y-2 flex flex-col justify-center">
-            <h5 class="text-xs font-bold text-slate-405 uppercase tracking-wider flex justify-between">
-                <span>Job Description Match</span>
-                <span class="text-slate-700 dark:text-slate-300 font-semibold">{{ ats_score }}%</span>
-            </h5>
-            <div class="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                <div class="h-full bg-gradient-to-r from-emerald-500 to-indigo-500 rounded-full" style="width: {{ ats_score }}%;"></div>
+            <div class="flex items-center justify-between">
+                <h5 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Skill Match</h5>
+                <span class="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    {% if gap_result %}{{ gap_result.gap_score }}%{% else %}—{% endif %}
+                </span>
             </div>
+            <div class="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-emerald-500 to-indigo-500 rounded-full transition-all duration-1000"
+                    style="width: {% if gap_result %}{{ gap_result.gap_score }}{% else %}0{% endif %}%;"></div>
+            </div>
+            {% if gap_result %}
+            <p class="text-[10px] text-slate-400">{{ gap_result.strong_skills | length }} strong · {{ gap_result.missing_skills | length }} missing</p>
+            {% endif %}
         </div>
 
-        <!-- Interview Score -->
-        {% set comm_score = (report.overall_score - 5) if (report.overall_score - 5) <= 100 else 90 %}
+        <!-- Learning plan CTA -->
         <div class="space-y-2 flex flex-col justify-center">
-            <h5 class="text-xs font-bold text-slate-405 uppercase tracking-wider flex justify-between">
-                <span>Simulator baseline</span>
-                <span class="text-slate-700 dark:text-slate-300 font-semibold">{{ comm_score }}%</span>
-            </h5>
-            <div class="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                <div class="h-full bg-gradient-to-r from-emerald-500 to-indigo-500 rounded-full" style="width: {{ comm_score }}%;"></div>
-            </div>
+            <h5 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Next Step</h5>
+            <a href="{{ url_for('learning_plan') }}" class="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-bold text-white hover:bg-indigo-700 transition-all">
+                <i data-lucide="map" class="h-3.5 w-3.5"></i>
+                Learning Plan
+            </a>
+            <a href="{{ url_for('ats_score') }}" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900 px-3 py-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 transition-all">
+                <i data-lucide="scan-text" class="h-3.5 w-3.5"></i>
+                ATS Details
+            </a>
         </div>
     </div>
 
@@ -344,8 +350,8 @@
     document.addEventListener("DOMContentLoaded", function() {
         const progressRing = document.getElementById("circular-progress-ring");
         if (progressRing) {
-            const score = {{ report.overall_score }};
-            const circumference = 169.6; // 2 * Math.PI * 27 = 169.6
+            const score = {% if readiness_result %}{{ readiness_result.overall_score }}{% else %}{{ report.overall_score }}{% endif %};
+            const circumference = 144.5; // 2 * Math.PI * 23 = 144.5
             const offset = circumference - (score / 100) * circumference;
             setTimeout(() => {
                 progressRing.style.strokeDashoffset = offset;

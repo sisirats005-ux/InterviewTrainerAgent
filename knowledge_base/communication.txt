@@ -1,0 +1,83 @@
+=== COMMUNICATION SKILLS FOR TECHNICAL INTERVIEWS ===
+
+--- TOPIC: WHY COMMUNICATION MATTERS IN TECH INTERVIEWS ---
+Technical skills get you the interview. Communication skills get you the offer.
+Studies show that 75% of rejected candidates at major tech firms are eliminated due to communication issues — not technical gaps. Interviewers evaluate not just WHAT you know, but HOW you explain it.
+
+--- TOPIC: THINK-ALOUD METHODOLOGY ---
+The most valued skill in a technical interview is narrating your thought process.
+Before writing any code or answering any question:
+1. Restate the problem in your own words to confirm understanding.
+2. Clarify ambiguities: "Should I handle null inputs?", "Is the array sorted?"
+3. Walk through your approach before coding: "I'll use a sliding window because..."
+4. Explain trade-offs: "This approach is O(n log n) — there's an O(n²) brute force alternative."
+5. After solving, discuss optimisations: "This could be improved by caching intermediate results."
+
+Weak: Silently writing code for 20 minutes.
+Strong: "I'm thinking a hash map would give us O(1) lookup here, which avoids the nested loop..."
+
+--- TOPIC: STRUCTURED ANSWER FRAMEWORKS ---
+
+1. STAR Method (Behavioural Questions):
+   Situation → Task → Action → Result
+   Use for: "Tell me about a time...", "Describe a situation where..."
+
+2. PREP Framework (Opinion/Opinion Questions):
+   Point → Reason → Example → Point (restate)
+   Use for: "What do you think about microservices?", "Do you prefer SQL or NoSQL?"
+
+3. The Feature-Benefit-Impact Framework (Project descriptions):
+   Feature: "I built a FAISS vector search module"
+   Benefit: "which reduced query latency from 1.2s to 80ms"
+   Impact: "enabling the product to scale to 100,000 daily active users"
+
+--- TOPIC: CLARITY AND BREVITY PRINCIPLES ---
+Interviewers assess information density. Aim for:
+- Short sentences when explaining complex concepts (average 15-20 words per sentence)
+- No filler phrases: "um", "like", "you know", "basically"
+- Answer the question asked — don't pad with irrelevant background
+- Conclude your answer clearly: "...and that's why I'd choose Redis for this use case."
+
+--- TOPIC: HANDLING UNKNOWN QUESTIONS ---
+When you don't know the answer:
+DO:
+- "I haven't worked with that specific technology, but here's how I'd approach learning it..."
+- "I'm not certain of the exact syntax, but the conceptual approach would be..."
+- "That's at the edge of my knowledge. My best understanding is X — can you confirm that's the right direction?"
+
+DON'T:
+- Lie or confabulate an incorrect answer
+- Say "I don't know" and stop there — this reads as disengaged
+- Ask the interviewer to tell you the answer
+
+--- TOPIC: PACE, PAUSE, AND PRESENCE ---
+Effective interview communication pace:
+- Speak at 130-150 words per minute (normal conversation is 160-180 wpm — slow down slightly)
+- Pause for 2-3 seconds before answering complex questions (shows thoughtfulness, not weakness)
+- Use pauses to collect thoughts rather than filler words
+- Maintain consistent energy level throughout — energy drops after 45 minutes in long interviews
+
+--- TOPIC: VIRTUAL INTERVIEW COMMUNICATION ---
+For remote/video interviews:
+1. Look at the camera, not the screen — this creates simulated eye contact.
+2. Use a plain, professional background.
+3. Ensure stable internet — have a mobile hotspot as backup.
+4. Mute notifications on all devices before the call.
+5. Keep your setup lit from the front (not behind you).
+6. Speak slightly slower than normal to compensate for audio compression.
+7. Confirm the interviewer can hear you clearly at the start.
+
+--- TOPIC: CLOSING THE INTERVIEW ---
+End every interview with 2-3 prepared questions:
+Strong closing questions:
+- "What does success look like for someone in this role in the first 90 days?"
+- "What are the biggest technical challenges the team is currently solving?"
+- "How does the team approach learning new technologies and upskilling?"
+- "What's your favourite part about working on this team?"
+
+Avoid:
+- "What's the salary?" (too early unless they bring it up)
+- "Will I get the job?" (pressure-creating)
+- "Can you tell me what you covered earlier?" (shows you weren't paying attention)
+
+=== END OF COMMUNICATION SKILLS KNOWLEDGE BASE ===

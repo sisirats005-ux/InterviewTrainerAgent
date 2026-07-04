@@ -1,0 +1,129 @@
+=== CODING INTERVIEW CONCEPTS & PROBLEM-SOLVING STRATEGIES ===
+
+--- TOPIC: THE 4-STEP CODING INTERVIEW FRAMEWORK ---
+Step 1 — Understand (2-3 min):
+  Read the problem twice. Ask clarifying questions. Define edge cases:
+  - What if the input is empty?
+  - Are there duplicate values?
+  - What's the expected output format?
+  - What are the input constraints? (determines O(n) vs O(n log n) requirements)
+
+Step 2 — Plan (3-5 min):
+  Think out loud. Walk through a simple example manually. Identify the pattern:
+  - Is this a sliding window, two pointers, BFS/DFS, DP, greedy, or divide & conquer?
+  - What data structures would simplify the problem? (hash map, heap, stack, deque)
+
+Step 3 — Code (15-20 min):
+  Write clean, readable code. Use meaningful variable names. Add brief comments.
+  Code your solution step by step — do not jump to optimisation before you have a working solution.
+
+Step 4 — Test & Optimise (5 min):
+  Trace through your code with a simple example. Check edge cases.
+  Discuss time complexity (Big O) and space complexity. Suggest improvements.
+
+--- TOPIC: MOST COMMON CODING PATTERNS ---
+
+1. TWO POINTERS — O(n)
+   Use when: sorted array, find pairs, remove duplicates, palindrome check
+   Pattern: left pointer starts at 0, right pointer starts at end. Move inward based on condition.
+
+2. SLIDING WINDOW — O(n)
+   Use when: contiguous subarray/substring, max/min sum, unique character windows
+   Pattern: expand right pointer, contract left pointer when constraint violated
+
+3. HASH MAP / SET — O(n) average
+   Use when: frequency counting, two-sum type problems, anagram detection, caching
+   Pattern: store values/indices as keys for O(1) lookup
+
+4. BINARY SEARCH — O(log n)
+   Use when: sorted array, search for boundary conditions, minimum/maximum in rotated array
+   Pattern: lo = 0, hi = n-1, mid = lo + (hi - lo) // 2
+
+5. BFS (Breadth-First Search) — O(V+E)
+   Use when: shortest path in unweighted graph, level-order traversal, nearest neighbour
+   Data structure: Queue (collections.deque)
+
+6. DFS (Depth-First Search) — O(V+E)
+   Use when: path existence, cycle detection, connected components, topological sort, tree traversal
+   Data structure: Stack (recursive call stack or explicit stack)
+
+7. DYNAMIC PROGRAMMING — O(n²) or O(n) with optimisation
+   Use when: optimal substructure, overlapping subproblems, counting paths, knapsack-type
+   Approach: Identify state → write recurrence relation → bottom-up tabulation or top-down memoisation
+
+8. HEAP / PRIORITY QUEUE — O(n log k)
+   Use when: top-k elements, median of stream, merge k sorted lists
+   Python: heapq module (min-heap by default; negate values for max-heap)
+
+--- TOPIC: TIME & SPACE COMPLEXITY REFERENCE ---
+O(1)        — Hash map lookup, array indexing
+O(log n)    — Binary search, balanced BST operations
+O(n)        — Linear scan, hash map construction
+O(n log n)  — Merge sort, heap sort, sorting-based solutions
+O(n²)       — Nested loops, bubble sort, comparing all pairs
+O(2^n)      — Recursive backtracking without memoisation (subsets, combinations)
+O(n!)       — Permutation generation
+
+In interviews, always state Big O BEFORE and AFTER your optimisation.
+
+--- TOPIC: PYTHON CODING INTERVIEW ESSENTIALS ---
+Data Structures:
+  List: [1, 2, 3] → O(1) index, O(n) search
+  Dict: {} → O(1) average insert/lookup
+  Set: {1, 2, 3} → O(1) average membership check
+  Deque: collections.deque → O(1) left and right append/pop (use for BFS queues)
+  Heap: heapq.heappush, heapq.heappop → O(log n)
+
+Common One-Liners:
+  Frequency count: from collections import Counter; Counter(arr)
+  Default dict: from collections import defaultdict; defaultdict(int)
+  Sort by key: sorted(arr, key=lambda x: x[1])
+  Zip two lists: list(zip(a, b))
+  Flatten list: [x for sublist in nested for x in sublist]
+
+String Manipulation:
+  "hello world".split() → ['hello', 'world']
+  " ".join(['hello', 'world']) → 'hello world'
+  s[::-1] → reverse string
+  s.lower(), s.upper(), s.strip()
+  ord('a') = 97, chr(97) = 'a'
+
+--- TOPIC: SYSTEM DESIGN INTERVIEW FRAMEWORK ---
+For backend/senior roles, system design rounds evaluate architectural thinking.
+
+Framework (8-step):
+1. Requirements — Clarify functional and non-functional requirements (scale, latency, availability)
+2. Capacity Estimation — Users, requests/second, storage needs
+3. High-Level Design — Draw block diagram: Client → API Gateway → Services → Database → Cache
+4. Data Model — Schema design, data types, indexing strategy
+5. Core API Design — REST endpoints or gRPC methods
+6. Scalability — Load balancer, horizontal scaling, database replication/sharding
+7. Caching — Redis/Memcached for hot data; CDN for static assets
+8. Trade-offs — Discuss CAP theorem, consistency vs availability, SQL vs NoSQL choice
+
+Common System Design Questions:
+- Design a URL shortener (bit.ly)
+- Design a chat application (WhatsApp/Slack)
+- Design a social media feed (Twitter/Instagram)
+- Design a rate limiter
+- Design a distributed cache
+- Design a job scheduling system
+
+--- TOPIC: BEHAVIOURAL CODING SIGNALS ---
+Interviewers watch for these coding behaviours:
+POSITIVE signals:
+  + Asks clarifying questions before coding
+  + Names variables descriptively (not a, b, c)
+  + Handles edge cases explicitly
+  + Tests with multiple examples
+  + Discusses trade-offs between approaches
+  + Recovers gracefully from bugs ("Oh I see — the issue is my left pointer advances one too many times")
+
+NEGATIVE signals:
+  - Starts coding immediately without understanding the problem
+  - Single-letter variable names throughout
+  - Panics when blocked instead of verbalising the obstacle
+  - Submits code without any testing
+  - Claims code works without tracing through it
+
+=== END OF CODING INTERVIEW CONCEPTS KNOWLEDGE BASE ===

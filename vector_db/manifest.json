@@ -1,15 +1,35 @@
 {
+  "ats_resume.txt": {
+    "size": 4123,
+    "mtime": 1783171537.4933817
+  },
   "behavioral.txt": {
     "size": 3904,
     "mtime": 1782559992.6200647
+  },
+  "coding_interviews.txt": {
+    "size": 5838,
+    "mtime": 1783171540.648519
+  },
+  "communication.txt": {
+    "size": 4287,
+    "mtime": 1783171546.8882673
+  },
+  "company_interviews.txt": {
+    "size": 6378,
+    "mtime": 1783171545.0141225
   },
   "dbms.txt": {
     "size": 3762,
     "mtime": 1782559980.5371473
   },
   "hr.txt": {
-    "size": 2905,
-    "mtime": 1782559988.9636252
+    "size": 4165,
+    "mtime": 1783171546.8882673
+  },
+  "industry_expectations.txt": {
+    "size": 4557,
+    "mtime": 1783171543.890121
   },
   "os.txt": {
     "size": 4121,

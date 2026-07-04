@@ -1,0 +1,70 @@
+=== ATS OPTIMISATION & RESUME WRITING KNOWLEDGE BASE ===
+
+--- TOPIC: WHAT IS ATS (APPLICANT TRACKING SYSTEM) ---
+An Applicant Tracking System (ATS) is software used by recruiters to scan, parse, and rank resumes before a human reads them. Over 95% of Fortune 500 companies use ATS. A resume that fails ATS parsing never reaches a recruiter's desk, regardless of qualifications.
+
+Key ATS Principles:
+1. Keyword density: ATS scores resumes based on how many role-specific keywords match the job description.
+2. Parseable formatting: ATS cannot reliably read tables, columns, headers/footers, text boxes, images, or unusual fonts.
+3. Standard section headers: Use "Experience", "Education", "Skills", "Certifications" — not creative alternatives.
+4. File format: Submit PDF (with text layer) or DOCX unless TXT is specifically requested.
+
+--- TOPIC: ATS-OPTIMISED RESUME STRUCTURE ---
+Recommended section order for maximum ATS and human readability:
+1. Name & Contact Information (name, email, phone, LinkedIn, GitHub)
+2. Professional Summary (2-3 lines, keyword-rich)
+3. Technical Skills (flat list or categorised)
+4. Work Experience (reverse chronological, bullet points with metrics)
+5. Projects (technical projects with technologies used)
+6. Education (degree, university, GPA if >= 3.5)
+7. Certifications (name, issuer, date)
+8. Achievements & Awards (optional but valuable)
+
+--- TOPIC: KEYWORD OPTIMISATION STRATEGY ---
+Step 1: Copy the full job description into a word cloud tool. Identify the top 15-20 most frequent technical and role-specific terms.
+Step 2: Compare against your resume. For each missing keyword, find a genuine experience or skill you can map it to.
+Step 3: Mirror exact terminology from the JD. If the JD says "RESTful APIs", use "RESTful APIs" — not "REST APIs" or "web services".
+Step 4: Distribute keywords throughout — summary, skills section, AND experience bullets. Not just the skills list.
+Step 5: Never keyword-stuff (listing skills you don't have). This is detected at the interview stage.
+
+--- TOPIC: QUANTIFYING ACHIEVEMENTS ---
+ATS and recruiters both score resumes higher when achievements are quantified.
+Weak: "Improved application performance"
+Strong: "Optimised PostgreSQL query execution, reducing average API response time from 850ms to 120ms (86% improvement)"
+
+Frameworks for quantification:
+- X% improvement: "Reduced deployment time by 40%"
+- Volume metrics: "Processed 50,000 records daily"
+- Scale metrics: "Led a team of 5 engineers"
+- Time metrics: "Delivered 2 weeks ahead of schedule"
+- Cost/value metrics: "Saved $15,000 annually in infrastructure costs"
+
+--- TOPIC: COMMON ATS DISQUALIFIERS ---
+1. Resume submitted as a scanned image (no text layer)
+2. Applicant address used as a header
+3. Contact info placed in a document header/footer (ATS cannot parse)
+4. Using tables or multi-column layouts (most ATS parsers fail)
+5. Skills listed as a word cloud image rather than text
+6. Fancy fonts (use Arial, Calibri, or Georgia)
+7. Missing or non-standard section headers
+8. File name with spaces: use "FirstName_LastName_Resume.pdf"
+
+--- TOPIC: TAILORING YOUR RESUME ---
+A generic resume has a 6% callback rate. A tailored resume has a 37% callback rate.
+
+For each application:
+1. Match your Professional Summary to the specific role.
+2. Reorder your Technical Skills so the most relevant appear first.
+3. Rewrite your top 2-3 experience bullets to align with the JD's priorities.
+4. Use the company's name and the exact job title somewhere in the document.
+
+--- TOPIC: CERTIFICATIONS THAT BOOST ATS SCORES ---
+High-value certifications that appear in JD keyword lists for tech roles:
+- Cloud: AWS Certified (Developer, Architect, Cloud Practitioner), GCP Associate, Azure AZ-900/AZ-104
+- DevOps/Containers: CKA (Certified Kubernetes Administrator), Docker DCA
+- IBM: IBM AI Engineering Professional Certificate, IBM Cloud Essentials (SkillsBuild)
+- Data: Google Data Analytics, IBM Data Science Professional Certificate
+- Security: CompTIA Security+, AWS Security Specialty
+- Agile: PMI-ACP, Scrum Master (PSM I)
+
+=== END OF ATS OPTIMISATION KNOWLEDGE BASE ===

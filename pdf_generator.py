@@ -15,13 +15,25 @@ def clean_text_for_pdf(text):
     # Remove any other non-ASCII characters if necessary
     return text.encode('ascii', 'ignore').decode('ascii')
 
-def generate_pdf_report(report, candidate, job_role, experience_level, company, difficulty, output_path="report.pdf"):
+def generate_pdf_report(
+    report,
+    candidate,
+    job_role,
+    experience_level,
+    company,
+    difficulty,
+    output_path="report.pdf",
+    ats_result=None,
+    gap_result=None,
+    readiness_result=None,
+):
     """
-    Generates a beautifully formatted PDF report containing:
+    Generates a formatted PDF report containing:
     1. Overall Readiness Score & Skill Breakdown.
-    2. Candidate Resume Summary.
-    3. Technical, HR, and Behavioral Questions & Answers.
-    4. Preparation Tips & Actionable Recommendations.
+    2. ATS Score + Skill Gap Analysis (if available).
+    3. Candidate Resume Summary.
+    4. Technical, HR, and Behavioral Questions & Answers.
+    5. Preparation Tips & Actionable Recommendations.
     
     Args:
         report (dict): The generated interview preparation report.
@@ -31,6 +43,9 @@ def generate_pdf_report(report, candidate, job_role, experience_level, company, 
         company (str): The target company name.
         difficulty (str): The interview difficulty tier.
         output_path (str): The path to save the generated PDF.
+        ats_result (dict, optional): ATS analysis result from ats_analyzer.
+        gap_result (dict, optional): Skill gap result from skill_gap.
+        readiness_result (dict, optional): Readiness score result from readiness_score.
         
     Returns:
         str: Absolute path to the saved PDF file.
@@ -156,7 +171,65 @@ def generate_pdf_report(report, candidate, job_role, experience_level, company, 
         page2.insert_text((x_margin + 15, y_cursor), "None identified. Strong core skill alignment.", fontsize=9.5, color=(0.2, 0.2, 0.2), fontname="helvetica-oblique")
         
     page2.insert_text((612/2 - 20, 750), "Page 2", fontsize=8, color=(0.5, 0.5, 0.5), fontname="helvetica")
-    
+
+    # ----------------------------------------------------
+    # PAGE 2B: ATS SCORE + SKILL GAP (injected if available)
+    # ----------------------------------------------------
+    if ats_result or gap_result or readiness_result:
+        page_ats = doc.new_page(width=612, height=792)
+        y_cursor = 60
+
+        page_ats.insert_text((x_margin, y_cursor), "READINESS & ATS ANALYSIS", fontsize=15, color=(0.1, 0.1, 0.4), fontname="helvetica-bold")
+        y_cursor += 15
+        shape = page_ats.new_shape()
+        shape.draw_line(fitz.Point(x_margin, y_cursor), fitz.Point(612 - x_margin, y_cursor))
+        shape.finish(color=(0.8, 0.8, 0.8), width=1)
+        shape.commit()
+        y_cursor += 18
+
+        if readiness_result:
+            page_ats.insert_text((x_margin, y_cursor), "INTERVIEW READINESS SCORE", fontsize=11, color=(0.06, 0.45, 0.3), fontname="helvetica-bold")
+            y_cursor += 14
+            page_ats.insert_text((x_margin + 15, y_cursor), f"Overall: {readiness_result.get('overall_score', 0)}/100  —  {readiness_result.get('readiness_level', '')}", fontsize=10, color=(0.2, 0.2, 0.2), fontname="helvetica")
+            y_cursor += 13
+            page_ats.insert_text((x_margin + 15, y_cursor), clean_text_for_pdf(readiness_result.get('readiness_description', '')), fontsize=9, color=(0.4, 0.4, 0.4), fontname="helvetica-oblique")
+            y_cursor += 20
+
+            cat_scores = readiness_result.get('category_scores', {})
+            for cat, score in cat_scores.items():
+                cat_label = cat.replace('_', ' ').title()
+                page_ats.insert_text((x_margin + 15, y_cursor), f"{cat_label}: {score}%", fontsize=9.5, color=(0.2, 0.2, 0.2), fontname="helvetica")
+                y_cursor += 13
+            y_cursor += 10
+
+        if ats_result:
+            page_ats.insert_text((x_margin, y_cursor), "ATS RESUME SCORE", fontsize=11, color=(0.1, 0.1, 0.4), fontname="helvetica-bold")
+            y_cursor += 14
+            page_ats.insert_text((x_margin + 15, y_cursor), f"ATS Score: {ats_result.get('ats_score', 0)}/100  |  Keyword Match: {ats_result.get('keyword_score', 0)}%  |  Format: {ats_result.get('formatting_score', 0)}%", fontsize=9.5, color=(0.2, 0.2, 0.2), fontname="helvetica")
+            y_cursor += 14
+
+            if ats_result.get('missing_keywords'):
+                missing_str = ", ".join(ats_result['missing_keywords'][:10])
+                page_ats.insert_text((x_margin + 15, y_cursor), f"Missing Keywords: {clean_text_for_pdf(missing_str)}", fontsize=9, color=(0.7, 0.1, 0.1), fontname="helvetica")
+                y_cursor += 13
+
+            for sug in ats_result.get('suggestions', [])[:4]:
+                page_ats.insert_textbox(fitz.Rect(x_margin + 15, y_cursor, 612 - x_margin, y_cursor + 28), f"- {clean_text_for_pdf(sug)}", fontsize=9, fontname="helvetica", color=(0.3, 0.3, 0.3))
+                y_cursor += 22
+            y_cursor += 10
+
+        if gap_result:
+            page_ats.insert_text((x_margin, y_cursor), "SKILL GAP SUMMARY", fontsize=11, color=(0.1, 0.1, 0.4), fontname="helvetica-bold")
+            y_cursor += 14
+            strong_str = ", ".join(gap_result.get('strong_skills', [])[:8])
+            missing_str = ", ".join(gap_result.get('missing_skills', [])[:8])
+            page_ats.insert_text((x_margin + 15, y_cursor), f"Strong: {clean_text_for_pdf(strong_str)}", fontsize=9.5, color=(0.06, 0.45, 0.3), fontname="helvetica")
+            y_cursor += 13
+            page_ats.insert_text((x_margin + 15, y_cursor), f"Gap Skills: {clean_text_for_pdf(missing_str)}", fontsize=9.5, color=(0.7, 0.1, 0.1), fontname="helvetica")
+            y_cursor += 13
+
+        page_ats.insert_text((612 / 2 - 20, 750), "Page 2b", fontsize=8, color=(0.5, 0.5, 0.5), fontname="helvetica")
+
     # ----------------------------------------------------
     # PAGE 3: TECHNICAL QUESTIONS & ANSWERS
     # ----------------------------------------------------

@@ -16,13 +16,23 @@
             <h1 class="font-heading text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Interactive Simulator</h1>
         </div>
         
-        <!-- Active session dot -->
-        <div class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-600 shadow-sm dark:border-slate-800 dark:bg-[#0c0d12] dark:text-slate-400">
-            <span class="relative flex h-2 w-2">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-450 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+        <!-- Active session dot + adaptive difficulty -->
+        <div class="flex items-center gap-2">
+            {% if current_difficulty %}
+            <span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-bold border
+                {% if current_difficulty == 'Hard' %}bg-red-50 border-red-100 text-red-600 dark:bg-red-950/20 dark:border-red-900/10
+                {% elif current_difficulty == 'Easy' %}bg-emerald-50 border-emerald-100 text-emerald-600 dark:bg-emerald-950/20 dark:border-emerald-900/10
+                {% else %}bg-amber-50 border-amber-100 text-amber-700 dark:bg-amber-950/20 dark:border-amber-900/10{% endif %}">
+                <i data-lucide="zap" class="h-3 w-3 mr-1"></i>{{ current_difficulty }}
             </span>
-            <span>Live Session</span>
+            {% endif %}
+            <div class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-600 shadow-sm dark:border-slate-800 dark:bg-[#0c0d12] dark:text-slate-400">
+                <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-450 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <span>Live Session</span>
+            </div>
         </div>
     </div>
 
@@ -58,6 +68,14 @@
         {% endif %}
 
         {% if evaluation %}
+        <!-- Adaptive Difficulty Change Banner -->
+        {% if evaluation.difficulty_changed %}
+        <div class="flex items-center gap-2 rounded-lg border border-indigo-200 bg-indigo-50/50 dark:border-indigo-900/30 dark:bg-indigo-950/10 px-4 py-3 text-sm font-semibold text-indigo-700 dark:text-indigo-300">
+            <i data-lucide="trending-up" class="h-4 w-4 text-indigo-500"></i>
+            Difficulty adjusted to <strong>{{ evaluation.new_difficulty }}</strong> based on your recent performance.
+        </div>
+        {% endif %}
+
         <!-- AI Feedback Bubble (Left-aligned) -->
         <div class="flex items-start gap-4 max-w-[85%]">
             <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white shadow-sm dark:bg-emerald-500 flex-shrink-0">
@@ -96,10 +114,25 @@
     <!-- Active Input Form or Progress Button -->
     <div class="pt-4">
         {% if not evaluation %}
-        <!-- Text entry form -->
+        <!-- Text entry form with Voice Mode -->
         <form id="mock-form" action="{{ url_for('mock_submit') }}" method="POST" class="space-y-4">
             <div class="space-y-2">
-                <textarea id="answer" name="answer" rows="5" class="w-full bg-white border border-slate-200 rounded-lg p-4 text-base text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 dark:bg-slate-900 dark:border-slate-800 dark:text-white transition-all leading-relaxed" placeholder="Type your response to the question above..." required></textarea>
+                <div class="flex items-center justify-between mb-1.5">
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Your Response</label>
+                    <button type="button" id="voice-btn" title="Toggle Voice Input" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900 px-3 py-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 hover:border-red-400 hover:text-red-500 transition-all">
+                        <i data-lucide="mic" class="h-3.5 w-3.5"></i>
+                        <span id="voice-label">Voice Input</span>
+                    </button>
+                </div>
+                <textarea id="answer" name="answer" rows="5" class="w-full bg-white border border-slate-200 rounded-lg p-4 text-base text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 dark:bg-slate-900 dark:border-slate-800 dark:text-white transition-all leading-relaxed" placeholder="Type your response — or use Voice Input above..." required></textarea>
+                <!-- Voice feedback bar (hidden by default) -->
+                <div id="voice-status" class="hidden flex items-center gap-2 rounded-lg border border-red-200 bg-red-50/50 dark:border-red-900/30 dark:bg-red-950/10 px-4 py-2.5 text-sm font-semibold text-red-600 dark:text-red-400">
+                    <span class="relative flex h-2.5 w-2.5 flex-shrink-0">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+                    </span>
+                    <span id="voice-feedback">Listening...</span>
+                </div>
             </div>
             
             <div class="flex justify-end">
@@ -160,6 +193,92 @@
                 const overlay = document.getElementById("loading-overlay");
                 if (overlay) overlay.style.display = "flex";
             });
+        }
+
+        // ================================================================
+        // Voice Input — Web Speech API (Phase 4.1)
+        // ================================================================
+        const voiceBtn = document.getElementById("voice-btn");
+        const voiceLabel = document.getElementById("voice-label");
+        const voiceStatus = document.getElementById("voice-status");
+        const voiceFeedback = document.getElementById("voice-feedback");
+        const answerTextarea = document.getElementById("answer");
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        if (voiceBtn && SpeechRecognition) {
+            const recognition = new SpeechRecognition();
+            recognition.lang = "en-US";
+            recognition.interimResults = true;
+            recognition.continuous = false;
+            recognition.maxAlternatives = 1;
+
+            let isListening = false;
+            let finalTranscript = answerTextarea ? answerTextarea.value : "";
+
+            recognition.onstart = () => {
+                isListening = true;
+                voiceLabel.textContent = "Stop Recording";
+                voiceBtn.classList.add("border-red-400", "text-red-500");
+                if (voiceStatus) voiceStatus.classList.remove("hidden");
+                if (voiceFeedback) voiceFeedback.textContent = "Listening... speak your answer.";
+            };
+
+            recognition.onresult = (event) => {
+                let interim = "";
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcript + " ";
+                    } else {
+                        interim = transcript;
+                    }
+                }
+                if (answerTextarea) {
+                    answerTextarea.value = finalTranscript + interim;
+                }
+                if (voiceFeedback) voiceFeedback.textContent = "Listening... " + (interim ? '"' + interim + '"' : "");
+            };
+
+            recognition.onerror = (event) => {
+                isListening = false;
+                voiceLabel.textContent = "Voice Input";
+                voiceBtn.classList.remove("border-red-400", "text-red-500");
+                if (voiceStatus) voiceStatus.classList.add("hidden");
+                let msg = "Voice error: " + event.error;
+                if (event.error === "not-allowed") msg = "Microphone access denied. Please allow microphone permissions.";
+                else if (event.error === "no-speech") msg = "No speech detected. Try again.";
+                if (voiceFeedback) voiceFeedback.textContent = msg;
+                if (voiceStatus) voiceStatus.classList.remove("hidden");
+            };
+
+            recognition.onend = () => {
+                isListening = false;
+                voiceLabel.textContent = "Voice Input";
+                voiceBtn.classList.remove("border-red-400", "text-red-500");
+                if (voiceStatus) voiceStatus.classList.add("hidden");
+                if (answerTextarea && finalTranscript.trim()) {
+                    answerTextarea.value = finalTranscript.trim();
+                }
+            };
+
+            voiceBtn.addEventListener("click", () => {
+                if (isListening) {
+                    recognition.stop();
+                } else {
+                    finalTranscript = answerTextarea ? answerTextarea.value : "";
+                    try {
+                        recognition.start();
+                    } catch (e) {
+                        // already started — ignore
+                    }
+                }
+            });
+
+        } else if (voiceBtn) {
+            // Browser doesn't support speech recognition
+            voiceBtn.title = "Voice input is not supported in this browser. Use Chrome or Edge.";
+            voiceBtn.classList.add("opacity-40", "cursor-not-allowed");
         }
     });
 </script>

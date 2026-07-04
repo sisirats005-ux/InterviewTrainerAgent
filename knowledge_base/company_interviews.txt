@@ -1,0 +1,86 @@
+=== COMPANY-SPECIFIC INTERVIEW EXPERIENCES & PREPARATION ===
+
+--- COMPANY: IBM ---
+Interview Structure: Typically 3-4 rounds — HR screen, technical (1-2 rounds), and a manager/values-based interview.
+Core Focus: Hybrid cloud, AI/ML with watsonx, open-source (Red Hat), and responsible AI.
+Technical Emphasis: System design, Python/Java, API design, cloud architecture on IBM Cloud/OpenShift.
+Behavioural Style: Heavy STAR method. Questions tied to IBM's culture (Think, Growth Mindset, Client Obsession).
+IBM-Specific Tips:
+1. Research IBM Garage methodology — it may come up in case-based questions.
+2. Know the difference between IBM Cloud, AWS, and Azure — be prepared to compare them.
+3. Be ready to discuss responsible AI and bias in model development.
+4. IBM values curiosity and learning — mention courses, certifications, and self-study.
+5. "Why IBM?" should reference watsonx.ai, hybrid cloud leadership, or sustainability commitments.
+
+Sample IBM Questions:
+- "Tell me about a time you had to adapt quickly to a new technology platform." (Adaptability)
+- "How would you design a scalable microservices architecture on IBM Cloud?" (System Design)
+- "Describe your experience with AI or ML models. How did you handle model bias?" (AI/ML)
+- "Why are you interested in IBM's hybrid cloud strategy?" (Culture Fit)
+
+--- COMPANY: GOOGLE ---
+Interview Structure: 5-6 rounds — phone screen, 4-5 virtual technical + behavioural loops, Hiring Committee review.
+Core Focus: Algorithms, data structures, system design at scale, and "Googleyness" (culture fit).
+Technical Emphasis: LeetCode Medium/Hard problems. Graph traversal, dynamic programming, tries, heaps.
+Behavioural Style: Leadership@Google framework. Questions about impact at scale, collaboration, and autonomy.
+Google-Specific Tips:
+1. Practice 150+ LeetCode problems, prioritising arrays, trees, graphs, and dynamic programming.
+2. For system design: know consistent hashing, load balancing, CDN, CAP theorem, database sharding.
+3. Use "I" statements in behavioural answers — Google evaluates individual contributions.
+4. Every answer should have a clear quantified result.
+5. "What's your biggest failure?" — Google expects honest reflection plus learnings applied.
+
+Sample Google Questions:
+- "Design a URL shortening service like bit.ly." (System Design)
+- "Given an array of integers, find all pairs that sum to a target value." (Coding — Two Pointers)
+- "Tell me about a time you influenced a project outcome without direct authority." (Leadership)
+- "How would you handle a situation where your team disagrees with your technical decision?" (Conflict)
+
+--- COMPANY: AMAZON ---
+Interview Structure: Online assessment → 1 phone screen → Virtual "loop" of 5-7 rounds evaluating all 16 Leadership Principles.
+Core Focus: 16 Leadership Principles — Customer Obsession, Ownership, Invent and Simplify, Dive Deep, Bias for Action.
+Technical Emphasis: AWS services, distributed systems, data structures, coding in Python/Java.
+Behavioural Style: Extremely STAR-focused. Every answer mapped to 1-2 Leadership Principles.
+Amazon-Specific Tips:
+1. Prepare 2 STAR stories for EACH of the 16 Leadership Principles before the interview.
+2. Structure answers: Situation → Task → Action → Result → Lessons Learned.
+3. Use specific metrics: "deployed to 40 million users", "reduced latency from 2s to 300ms".
+4. "Tell me about a time you disagreed with your manager" tests Ownership + Have Backbone.
+5. Bar Raiser round: You are evaluated against the hiring bar, not just the specific team.
+
+Amazon's 16 Leadership Principles: Customer Obsession, Ownership, Invent and Simplify, Are Right A Lot, Learn and Be Curious, Hire and Develop the Best, Insist on the Highest Standards, Think Big, Bias for Action, Frugality, Earn Trust, Dive Deep, Have Backbone; Disagree and Commit, Deliver Results, Strive to be Earth's Best Employer, Success and Scale Bring Broad Responsibility.
+
+--- COMPANY: MICROSOFT ---
+Interview Structure: 4-5 rounds — phone screen, virtual design + coding rounds, culture/values interview.
+Core Focus: Growth mindset, Azure cloud services, inclusive design, and product empathy.
+Technical Emphasis: Coding (Leetcode Medium), system design (Azure-centric), and product sense.
+Behavioural Style: Microsoft values growth mindset — show you learn from failure, not avoid it.
+Microsoft-Specific Tips:
+1. Research Azure services: App Service, AKS, Cosmos DB, Azure Functions, DevOps Pipelines.
+2. For system design: frame answers around Azure-native solutions when possible.
+3. "Growth mindset" is Satya Nadella's core philosophy — show curiosity and learning agility.
+4. Answer "Tell me about a time you failed" with genuine reflection, not spin.
+5. Know the difference between SaaS, PaaS, IaaS — common in Azure design discussions.
+
+--- COMPANY: TCS ---
+Interview Structure: Online test (aptitude + coding) → HR interview → Technical interview.
+Core Focus: IT service delivery, programming fundamentals, and communication skills.
+Technical Emphasis: Java, Python, SQL, OOPS concepts, basic data structures.
+Behavioural Style: Professional communication, team orientation, and client-service mindset.
+TCS-Specific Tips:
+1. Practice aptitude tests (quantitative, verbal, logical). TCS National Qualifier Test (NQT) is the standard.
+2. Know OOP concepts thoroughly: encapsulation, inheritance, polymorphism, abstraction with code examples.
+3. Write clean, commented code solutions for basic algorithms (sorting, searching, string manipulation).
+4. "Why TCS?" — reference their iON platform, global delivery scale, or innovation labs.
+
+--- COMPANY: INFOSYS ---
+Interview Structure: HackerRank test → Group discussion → Technical interview → HR interview.
+Core Focus: Digital transformation, Java/Python fundamentals, and client service excellence.
+Technical Emphasis: Java, databases, basic algorithms, and verbal reasoning.
+Infosys-Specific Tips:
+1. Practice HackerRank Easy/Medium problems — Infosys tests are timed coding assessments.
+2. Know SQL operations thoroughly: JOINs, GROUP BY, subqueries, window functions.
+3. Prepare for situational HR questions: "How do you handle a difficult client?"
+4. "Why Infosys?" — mention Infosys Springboard, digital transformation services, or training programs.
+
+=== END OF COMPANY-SPECIFIC INTERVIEW KNOWLEDGE BASE ===

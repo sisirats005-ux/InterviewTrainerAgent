@@ -95,15 +95,20 @@
                 <div class="space-y-2">
                     <label for="company" class="block text-[13px] font-bold text-slate-455 dark:text-slate-500 uppercase tracking-wider">Target Company</label>
                     <select id="company" name="company" class="w-full bg-white border border-slate-200 rounded-lg px-4 py-3 text-base text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 dark:bg-slate-900 dark:border-slate-800 dark:text-white transition-all font-medium" required>
-                        <option value="IBM" selected>IBM</option>
-                        <option value="Google">Google</option>
-                        <option value="Microsoft">Microsoft</option>
-                        <option value="Amazon">Amazon</option>
-                        <option value="TCS">TCS</option>
-                        <option value="Infosys">Infosys</option>
-                        <option value="Wipro">Wipro</option>
-                        <option value="Accenture">Accenture</option>
-                        <option value="Capgemini">Capgemini</option>
+                        {% if supported_companies %}
+                            {% for co in supported_companies %}
+                            <option value="{{ co }}" {% if co == 'IBM' %}selected{% endif %}>{{ co }}</option>
+                            {% endfor %}
+                        {% else %}
+                            <option value="IBM" selected>IBM</option>
+                            <option value="Google">Google</option>
+                            <option value="Microsoft">Microsoft</option>
+                            <option value="Amazon">Amazon</option>
+                            <option value="TCS">TCS</option>
+                            <option value="Infosys">Infosys</option>
+                            <option value="Wipro">Wipro</option>
+                            <option value="Accenture">Accenture</option>
+                        {% endif %}
                     </select>
                 </div>
 
@@ -128,27 +133,48 @@
     </div>
 
     <!-- Product Features Card Row below -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16 pt-10 border-t border-slate-100 dark:border-slate-900">
-        <div class="space-y-3">
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-6 mt-14 pt-10 border-t border-slate-100 dark:border-slate-900">
+        <div class="space-y-2">
             <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-500 dark:bg-emerald-950/45">
                 <i data-lucide="cpu" class="h-5 w-5"></i>
             </div>
-            <h5 class="text-base font-bold text-slate-800 dark:text-slate-250">AI Interview Coach</h5>
-            <p class="text-xs sm:text-sm text-slate-450 leading-relaxed font-normal">Generate custom, structured interview prep guides based on your exact resume and target role profiles.</p>
+            <h5 class="text-sm font-bold text-slate-800 dark:text-slate-250">AI Interview Coach</h5>
+            <p class="text-xs text-slate-450 leading-relaxed">Custom interview prep guides powered by IBM Granite 4 and RAG.</p>
         </div>
-        <div class="space-y-3">
+        <div class="space-y-2">
             <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-500 dark:bg-indigo-950/45">
-                <i data-lucide="sliders" class="h-5 w-5"></i>
+                <i data-lucide="scan-text" class="h-5 w-5"></i>
             </div>
-            <h5 class="text-base font-bold text-slate-800 dark:text-slate-250">Career Match</h5>
-            <p class="text-xs sm:text-sm text-slate-455 leading-relaxed font-normal">Directly compare your technical resume context against JDs to calculate matching stats and identify gaps.</p>
+            <h5 class="text-sm font-bold text-slate-800 dark:text-slate-250">ATS Resume Score</h5>
+            <p class="text-xs text-slate-455 leading-relaxed">Keyword analysis, formatting check, and actionable suggestions.</p>
         </div>
-        <div class="space-y-3">
+        <div class="space-y-2">
             <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-500 dark:bg-amber-950/45">
                 <i data-lucide="play-circle" class="h-5 w-5"></i>
             </div>
-            <h5 class="text-base font-bold text-slate-800 dark:text-slate-250">Mock Simulator</h5>
-            <p class="text-xs sm:text-sm text-slate-455 leading-relaxed font-normal">Assess your response delivery patterns in an interactive evaluated text console powered by Granite.</p>
+            <h5 class="text-sm font-bold text-slate-800 dark:text-slate-250">Adaptive Mock Interview</h5>
+            <p class="text-xs text-slate-455 leading-relaxed">5-question adaptive simulator — difficulty adjusts to your performance.</p>
+        </div>
+        <div class="space-y-2">
+            <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-50 text-violet-500 dark:bg-violet-950/45">
+                <i data-lucide="star" class="h-5 w-5"></i>
+            </div>
+            <h5 class="text-sm font-bold text-slate-800 dark:text-slate-250">STAR Evaluation</h5>
+            <p class="text-xs text-slate-455 leading-relaxed">Behavioural answers scored across Situation, Task, Action, Result.</p>
+        </div>
+        <div class="space-y-2">
+            <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-500 dark:bg-red-950/45">
+                <i data-lucide="book-open" class="h-5 w-5"></i>
+            </div>
+            <h5 class="text-sm font-bold text-slate-800 dark:text-slate-250">Personalised Learning Plan</h5>
+            <p class="text-xs text-slate-455 leading-relaxed">Daily goals, weekly milestones, and curated resources for your gaps.</p>
+        </div>
+        <div class="space-y-2">
+            <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-500 dark:bg-slate-800">
+                <i data-lucide="bar-chart-2" class="h-5 w-5"></i>
+            </div>
+            <h5 class="text-sm font-bold text-slate-800 dark:text-slate-250">Analytics Dashboard</h5>
+            <p class="text-xs text-slate-455 leading-relaxed">Track readiness trends, strong skills, and recurring gaps over time.</p>
         </div>
     </div>
 

@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block title %}ATS Resume Score - Interview Trainer{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-4xl space-y-8">
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-100 dark:border-slate-900 pb-5">
+        <div class="space-y-1">
+            <div class="flex items-center gap-2 text-sm font-medium text-slate-400 dark:text-slate-500">
+                <span>Analysis</span>
+                <i data-lucide="chevron-right" class="h-3.5 w-3.5"></i>
+                <span class="font-semibold text-slate-600 dark:text-slate-300">ATS Compatibility</span>
+            </div>
+            <h1 class="font-heading text-3xl sm:text-[38px] font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">ATS Resume Score</h1>
+            <p class="text-sm text-slate-400">Applicant Tracking System compatibility analysis for <strong class="text-slate-600 dark:text-slate-300">{{ job_role }}</strong></p>
+        </div>
+        <div class="flex gap-2">
+            <a href="{{ url_for('home') }}" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300 dark:hover:bg-slate-900 shadow-sm transition-all">
+                <i data-lucide="refresh-cw" class="h-4 w-4"></i>
+                <span>New Analysis</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Score Summary Metrics -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 border-b border-slate-100 dark:border-slate-900 pb-8">
+
+        <!-- ATS Score Ring -->
+        <div class="flex items-center gap-5">
+            <div class="relative w-20 h-20 flex-shrink-0">
+                <svg class="w-full h-full -rotate-90" viewBox="0 0 64 64">
+                    <circle class="fill-none stroke-slate-100 dark:stroke-slate-800" stroke-width="6" cx="32" cy="32" r="26"></circle>
+                    <circle id="ats-ring" class="fill-none" stroke-width="6" stroke-linecap="round" cx="32" cy="32" r="26"
+                        style="stroke-dasharray:163.4; stroke-dashoffset:163.4; transition: stroke-dashoffset 1.4s cubic-bezier(.16,1,.3,1);"
+                        stroke="{% if ats_result.ats_score >= 75 %}#10b981{% elif ats_result.ats_score >= 55 %}#f59e0b{% else %}#ef4444{% endif %}">
+                    </circle>
+                </svg>
+                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                    <span class="font-heading text-xl font-extrabold text-slate-900 dark:text-white" id="ats-score-text">{{ ats_result.ats_score }}</span>
+                    <span class="text-[10px] font-bold text-slate-400">/100</span>
+                </div>
+            </div>
+            <div>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">ATS Score</p>
+                <p class="text-base font-bold {% if ats_result.ats_score >= 75 %}text-emerald-600 dark:text-emerald-400{% elif ats_result.ats_score >= 55 %}text-amber-600 dark:text-amber-400{% else %}text-red-600 dark:text-red-400{% endif %}">
+                    {% if ats_result.ats_score >= 75 %}ATS Friendly{% elif ats_result.ats_score >= 55 %}Needs Improvement{% else %}High Risk{% endif %}
+                </p>
+                <p class="text-xs text-slate-400 mt-0.5">{{ ats_result.keyword_coverage | round(0) | int * 1 }}% keyword coverage</p>
+            </div>
+        </div>
+
+        <!-- Keyword Score -->
+        <div class="space-y-2 flex flex-col justify-center">
+            <div class="flex items-center justify-between">
+                <h6 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Keyword Match</h6>
+                <span class="text-sm font-bold text-slate-700 dark:text-slate-300">{{ ats_result.keyword_score }}%</span>
+            </div>
+            <div class="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                <div class="h-full rounded-full bg-gradient-to-r from-emerald-500 to-indigo-500 transition-all duration-1000" style="width: {{ ats_result.keyword_score }}%;"></div>
+            </div>
+            <p class="text-xs text-slate-400">{{ ats_result.keyword_matches | length }} of {{ (ats_result.keyword_matches | length) + (ats_result.missing_keywords | length) }} role keywords matched</p>
+        </div>
+
+        <!-- Formatting Score -->
+        <div class="space-y-2 flex flex-col justify-center">
+            <div class="flex items-center justify-between">
+                <h6 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Resume Format</h6>
+                <span class="text-sm font-bold text-slate-700 dark:text-slate-300">{{ ats_result.formatting_score }}%</span>
+            </div>
+            <div class="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                <div class="h-full rounded-full {% if ats_result.formatting_score >= 75 %}bg-emerald-500{% elif ats_result.formatting_score >= 55 %}bg-amber-500{% else %}bg-red-500{% endif %} transition-all duration-1000" style="width: {{ ats_result.formatting_score }}%;"></div>
+            </div>
+            <p class="text-xs text-slate-400">Section completeness & contact info</p>
+        </div>
+    </div>
+
+    <!-- Keyword Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 border-b border-slate-100 dark:border-slate-900 pb-8">
+        <!-- Matched Keywords -->
+        <div class="space-y-3">
+            <h6 class="font-heading text-sm font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider flex items-center gap-2">
+                <i data-lucide="check-circle" class="h-4 w-4"></i>
+                Matched Keywords ({{ ats_result.keyword_matches | length }})
+            </h6>
+            {% if ats_result.keyword_matches %}
+            <div class="flex flex-wrap gap-2">
+                {% for kw in ats_result.keyword_matches %}
+                <span class="inline-flex items-center rounded bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/20">{{ kw }}</span>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-sm text-slate-400 italic">No matching keywords found for this role.</p>
+            {% endif %}
+        </div>
+
+        <!-- Missing Keywords -->
+        <div class="space-y-3">
+            <h6 class="font-heading text-sm font-bold text-red-500 uppercase tracking-wider flex items-center gap-2">
+                <i data-lucide="x-circle" class="h-4 w-4"></i>
+                Missing Keywords ({{ ats_result.missing_keywords | length }})
+            </h6>
+            {% if ats_result.missing_keywords %}
+            <div class="flex flex-wrap gap-2">
+                {% for kw in ats_result.missing_keywords %}
+                <span class="inline-flex items-center rounded bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700 dark:bg-red-950/20 dark:text-red-400 border border-red-100 dark:border-red-900/20">{{ kw }}</span>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-sm text-emerald-600 font-semibold flex items-center gap-1.5"><i data-lucide="check" class="h-4 w-4"></i> All key terms are present.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Skill Gap Snapshot -->
+    {% if gap_result %}
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 border-b border-slate-100 dark:border-slate-900 pb-8">
+        <div class="rounded-xl border border-emerald-100 dark:border-emerald-900/20 bg-emerald-50/30 dark:bg-emerald-950/5 p-4 text-center">
+            <p class="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">{{ gap_result.strong_skills | length }}</p>
+            <p class="text-xs font-bold text-emerald-700 dark:text-emerald-500 uppercase tracking-wide mt-1">Strong Skills</p>
+        </div>
+        <div class="rounded-xl border border-indigo-100 dark:border-indigo-900/20 bg-indigo-50/30 dark:bg-indigo-950/5 p-4 text-center">
+            <p class="text-2xl font-extrabold text-indigo-600 dark:text-indigo-400">{{ gap_result.matching_skills | length }}</p>
+            <p class="text-xs font-bold text-indigo-700 dark:text-indigo-500 uppercase tracking-wide mt-1">Matching</p>
+        </div>
+        <div class="rounded-xl border border-red-100 dark:border-red-900/20 bg-red-50/30 dark:bg-red-950/5 p-4 text-center">
+            <p class="text-2xl font-extrabold text-red-600 dark:text-red-400">{{ gap_result.missing_skills | length }}</p>
+            <p class="text-xs font-bold text-red-700 dark:text-red-500 uppercase tracking-wide mt-1">Missing</p>
+        </div>
+        <div class="rounded-xl border border-amber-100 dark:border-amber-900/20 bg-amber-50/30 dark:bg-amber-950/5 p-4 text-center">
+            <p class="text-2xl font-extrabold text-amber-600 dark:text-amber-400">{{ gap_result.recommended_skills | length }}</p>
+            <p class="text-xs font-bold text-amber-700 dark:text-amber-500 uppercase tracking-wide mt-1">Recommended</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Improvement Suggestions -->
+    <div class="space-y-4">
+        <h5 class="font-heading text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider flex items-center gap-2">
+            <i data-lucide="lightbulb" class="h-5 w-5 text-amber-500"></i>
+            ATS Improvement Suggestions
+        </h5>
+        <ul class="space-y-3">
+            {% for suggestion in ats_result.suggestions %}
+            <li class="flex items-start gap-3 rounded-lg border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/10 p-4">
+                <div class="mt-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-950/30 flex-shrink-0">
+                    <i data-lucide="arrow-right" class="h-3 w-3 text-amber-600 dark:text-amber-400"></i>
+                </div>
+                <span class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{{ suggestion }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- CTA -->
+    <div class="flex flex-wrap gap-3">
+        <a href="{{ url_for('learning_plan') }}" class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-bold text-white hover:bg-slate-800 dark:bg-emerald-500 dark:hover:bg-emerald-600 transition-all shadow-sm">
+            <i data-lucide="map" class="h-4 w-4"></i>
+            <span>View Learning Plan</span>
+        </a>
+        <a href="{{ url_for('mock_start') }}" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300 shadow-sm transition-all">
+            <i data-lucide="play" class="h-4 w-4"></i>
+            <span>Practice Interview</span>
+        </a>
+    </div>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const ring = document.getElementById("ats-ring");
+    if (ring) {
+        const score = {{ ats_result.ats_score }};
+        const circumference = 163.4;
+        const offset = circumference - (score / 100) * circumference;
+        setTimeout(() => { ring.style.strokeDashoffset = offset; }, 200);
+    }
+});
+</script>
+{% endblock %}

@@ -3,12 +3,29 @@ import json
 import logging
 import uuid
 import time
-from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file
+from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file, jsonify
 from werkzeug.utils import secure_filename
 from resume_parser import parse_resume, extract_text
-from interview import generate_interview_prep, generate_jd_match, generate_mock_interview_questions, evaluate_mock_answer
+from interview import (
+    generate_interview_prep,
+    generate_jd_match,
+    generate_mock_interview_questions,
+    evaluate_mock_answer,
+    evaluate_star_answer,
+    compute_adaptive_difficulty,
+    generate_adaptive_question,
+    generate_behavioural_questions,
+    evaluate_behavioural_answer,
+    generate_learning_plan,
+    COMPANY_PROFILES,
+    BEHAVIOURAL_COMPETENCIES,
+)
 from rag import build_vector_db
 from pdf_generator import generate_pdf_report
+from ats_analyzer import calculate_ats_score
+from skill_gap import analyse_skill_gap
+from readiness_score import calculate_readiness_score
+from analytics import record_session, get_dashboard_data
 
 # Configure Gunicorn-ready logging to app.log and stdout
 logging.basicConfig(
@@ -27,6 +44,7 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("FLASK_SECRET_KEY", "dev_secret_key_carbon_998877")
 UPLOAD_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__), "uploads"))
 ALLOWED_EXTENSIONS = {"pdf", "txt", "docx"}
+SUPPORTED_COMPANIES = list(COMPANY_PROFILES.keys())
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["MAX_CONTENT_LENGTH"] = 4 * 1024 * 1024  # Enforce strict 4MB upload limit
 
@@ -117,6 +135,8 @@ def home():
     """
     Handles landing page (GET) and processes the form submission (POST)
     for generating the main Interview Trainer guide.
+    Runs ATS analysis, skill gap analysis, and readiness scoring in addition
+    to the existing Granite preparation guide generation.
     """
     watsonx_configured = bool(os.getenv("WATSONX_APIKEY") and os.getenv("WATSONX_PROJECT_ID"))
 
@@ -161,8 +181,9 @@ def home():
             file.save(file_path)
             logger.info(f"Resume uploaded successfully: {filename}")
             
-            # Track Resume Parsing Time
             t_start = time.time()
+
+            # --- Phase 1: Resume Parsing ---
             t_parse_start = time.time()
             candidate_data = parse_resume(file_path)
             parse_time = time.time() - t_parse_start
@@ -170,22 +191,33 @@ def home():
             if not candidate_data["skills"] and not candidate_data["raw_text"]:
                 flash("Failed to parse text. Please ensure the PDF is not encrypted or blank.", "danger")
                 return redirect(url_for("home"))
+
+            # --- Phase 1.1: ATS Score (deterministic, no LLM) ---
+            ats_result = calculate_ats_score(candidate_data, job_role)
+            logger.info(f"ATS score: {ats_result['ats_score']}/100 for {candidate_data['name']}")
+
+            # --- Phase 1.2: Skill Gap Analysis (deterministic, no LLM) ---
+            gap_result = analyse_skill_gap(candidate_data, job_role)
+            logger.info(f"Skill gap score: {gap_result['gap_score']}/100 for role '{job_role}'")
+
+            # --- Phase 1.3: Readiness Score (deterministic, no LLM) ---
+            readiness_result = calculate_readiness_score(candidate_data, gap_result["gap_score"])
+            logger.info(f"Readiness score: {readiness_result['overall_score']}/100")
                 
-            # Track RAG + Granite Generation Time
+            # --- Granite Generation: Full Interview Prep Guide ---
             logger.info(f"Generating prep guide for {candidate_data['name']} (Role: {job_role}, Company: {company})")
             t_gen_start = time.time()
             report = generate_interview_prep(candidate_data, job_role, experience_level, company, difficulty)
             gen_time = time.time() - t_gen_start
             total_time = time.time() - t_start
             
-            # Extract internal RAG and LLM breakdown times
             timings = report.get("timings", {})
             rag_time_str = timings.get("rag_time", "0.000s")
             llm_time_str = timings.get("llm_time", "0.000s")
             
-            # Print developer performance logs in debug mode
-            logger.info(f"--- Developer Performance Metrics ---")
+            logger.info("--- Developer Performance Metrics ---")
             logger.info(f"Resume Parsing Time: {parse_time:.4f}s")
+            logger.info(f"ATS/Gap/Readiness Time (deterministic): included in parse")
             logger.info(f"RAG Retrieval Time: {rag_time_str}")
             logger.info(f"Granite API Response Time: {llm_time_str}")
             logger.info(f"Total Request Execution Time: {total_time:.4f}s")
@@ -194,11 +226,28 @@ def home():
                 "parse_time": f"{parse_time:.3f}s",
                 "rag_time": rag_time_str,
                 "llm_time": llm_time_str,
-                "total_time": f"{total_time:.3f}s"
+                "total_time": f"{total_time:.3f}s",
             }
             
-            # Save relevant profile data in disk cache rather than Flask session
+            # --- Record analytics ---
             report_id = str(uuid.uuid4())
+            try:
+                record_session(
+                    session_id=report_id,
+                    candidate_name=candidate_data.get("name", "Unknown"),
+                    job_role=job_role,
+                    company=company,
+                    ats_score=ats_result["ats_score"],
+                    readiness_score=readiness_result["overall_score"],
+                    mock_avg_score=None,
+                    strong_skills=gap_result["strong_skills"],
+                    missing_skills=gap_result["missing_skills"],
+                    category_scores=readiness_result["category_scores"],
+                )
+            except Exception as analytics_err:
+                logger.warning(f"Analytics recording failed (non-critical): {analytics_err}")
+
+            # --- Save all session data to disk ---
             session_data = {
                 "report": report,
                 "candidate": candidate_data,
@@ -206,12 +255,15 @@ def home():
                 "experience_level": experience_level,
                 "company": company,
                 "difficulty": difficulty,
-                "metrics": metrics
+                "metrics": metrics,
+                "ats_result": ats_result,
+                "gap_result": gap_result,
+                "readiness_result": readiness_result,
             }
             save_session_data(report_id, session_data)
             cleanup_old_sessions()
             
-            # Store only metadata and session index ID in browser cookie
+            # Store only lightweight references in cookie
             session["report_id"] = report_id
             session["current_job_role"] = job_role
             session["current_experience_level"] = experience_level
@@ -230,14 +282,21 @@ def home():
                 experience_level=experience_level,
                 company=company,
                 difficulty=difficulty,
-                metrics=metrics
+                metrics=metrics,
+                ats_result=ats_result,
+                gap_result=gap_result,
+                readiness_result=readiness_result,
             )
         except Exception as ex:
             logger.error(f"Error serving interview generation route: {ex}", exc_info=True)
             flash(f"Generation failed: {ex}", "danger")
             return redirect(url_for("home"))
 
-    return render_template("index.html", watsonx_configured=watsonx_configured)
+    return render_template(
+        "index.html",
+        watsonx_configured=watsonx_configured,
+        supported_companies=SUPPORTED_COMPANIES,
+    )
 
 # ====================================================
 # JOB DESCRIPTION MATCHER MODULE (PHASE 6)
@@ -395,6 +454,7 @@ def mock_question():
 def mock_submit():
     """
     Evaluates candidate text answer for the current question using Granite.
+    Applies adaptive difficulty adjustment after every 2 answers.
     """
     report_id = session.get("report_id")
     sdata = load_session_data(report_id)
@@ -413,31 +473,43 @@ def mock_submit():
     
     job_role = session.get("current_job_role")
     company = session.get("current_company")
-    difficulty = session.get("current_difficulty")
+    difficulty = mock_state.get("current_difficulty", session.get("current_difficulty", "Medium"))
     
     try:
-        logger.info(f"Submitting mock answer for question {idx+1} evaluation...")
+        logger.info(f"Submitting mock answer for question {idx+1} (difficulty={difficulty})...")
         evaluation = evaluate_mock_answer(question, user_answer, job_role, company, difficulty)
         
-        # Save Q&A to history log file
-        mock_state["history"].append({
+        answer_entry = {
             "question": question,
             "answer": user_answer,
             "score": evaluation.get("score", 70),
             "strengths": evaluation.get("strengths", ""),
             "weaknesses": evaluation.get("weaknesses", ""),
             "feedback": evaluation.get("feedback", ""),
-            "ideal_answer": evaluation.get("ideal_answer", "")
-        })
+            "ideal_answer": evaluation.get("ideal_answer", ""),
+            "difficulty": difficulty,
+        }
+        mock_state["history"].append(answer_entry)
+
+        # Phase 1.4 — Adaptive difficulty adjustment every 2 answers
+        recent_scores = [h["score"] for h in mock_state["history"]]
+        new_difficulty = compute_adaptive_difficulty(difficulty, recent_scores)
+        if new_difficulty != difficulty:
+            mock_state["current_difficulty"] = new_difficulty
+            evaluation["difficulty_changed"] = True
+            evaluation["new_difficulty"] = new_difficulty
+            logger.info(f"Adaptive difficulty changed: {difficulty} → {new_difficulty}")
+
         save_session_data(report_id, sdata)
         
-        # Render feedback evaluation along with Next button
         return render_template(
             "mock_interview.html",
             question=question,
             index=idx + 1,
             total=len(mock_state["questions"]),
-            evaluation=evaluation
+            evaluation=evaluation,
+            current_difficulty=new_difficulty,
+            user_answer=user_answer,
         )
     except Exception as e:
         logger.error(f"Error evaluating mock answer: {e}", exc_info=True)
@@ -467,6 +539,7 @@ def mock_next():
 def mock_results():
     """
     Aggregates full session feedback and renders summary dashboard.
+    Updates analytics with the mock interview average score.
     """
     report_id = session.get("report_id")
     sdata = load_session_data(report_id)
@@ -483,11 +556,31 @@ def mock_results():
     # Calculate average score
     total_score = sum(item["score"] for item in history)
     avg_score = int(total_score / len(history)) if history else 0
+
+    # Update analytics with mock performance
+    try:
+        candidate = sdata.get("candidate", {})
+        ats_result = sdata.get("ats_result", {})
+        readiness_result = sdata.get("readiness_result", {})
+        gap_result = sdata.get("gap_result", {})
+        record_session(
+            session_id=report_id + "_mock",
+            candidate_name=candidate.get("name", "Unknown"),
+            job_role=session.get("current_job_role", ""),
+            company=session.get("current_company", ""),
+            ats_score=ats_result.get("ats_score", 0),
+            readiness_score=readiness_result.get("overall_score", avg_score),
+            mock_avg_score=avg_score,
+            strong_skills=gap_result.get("strong_skills", []),
+            missing_skills=gap_result.get("missing_skills", []),
+            category_scores=readiness_result.get("category_scores", {}),
+        )
+    except Exception as e:
+        logger.warning(f"Analytics update after mock failed (non-critical): {e}")
     
     # Clean up mock memory in file
     sdata.pop("mock", None)
     save_session_data(report_id, sdata)
-    
     session.pop("mock_active", None)
     
     return render_template("mock_results.html", history=history, score=avg_score)
@@ -544,7 +637,12 @@ def download_pdf():
         
     try:
         temp_pdf = os.path.join(app.config["UPLOAD_FOLDER"], "prep_manual.pdf")
-        generate_pdf_report(report, candidate, job_role, experience_level, company, difficulty, temp_pdf)
+        generate_pdf_report(
+            report, candidate, job_role, experience_level, company, difficulty, temp_pdf,
+            ats_result=sdata.get("ats_result"),
+            gap_result=sdata.get("gap_result"),
+            readiness_result=sdata.get("readiness_result"),
+        )
         
         return send_file(
             temp_pdf,
@@ -556,6 +654,211 @@ def download_pdf():
         logger.error(f"Error compiling PDF for download: {e}", exc_info=True)
         flash(f"Failed to compile PDF report: {e}", "danger")
         return redirect(url_for("home"))
+
+# ====================================================
+# ANALYTICS DASHBOARD (PHASE 3.2)
+# ====================================================
+@app.route("/analytics")
+def analytics_dashboard():
+    """
+    Renders the analytics dashboard with historical performance data.
+    """
+    data = get_dashboard_data()
+    return render_template("analytics.html", data=data)
+
+
+# ====================================================
+# BEHAVIOURAL INTERVIEW MODULE (PHASE 2.3)
+# ====================================================
+@app.route("/behavioural", methods=["GET", "POST"])
+def behavioural_interview():
+    """
+    GET: Render company-specific behavioural interview question generator.
+    POST: Generate and evaluate a behavioural answer using STAR scoring.
+    """
+    watsonx_configured = bool(os.getenv("WATSONX_APIKEY") and os.getenv("WATSONX_PROJECT_ID"))
+
+    report_id = session.get("report_id")
+    sdata = load_session_data(report_id)
+    candidate = sdata.get("candidate", {})
+    company = session.get("current_company", "IBM")
+    job_role = session.get("current_job_role", "Software Engineer")
+
+    if request.method == "POST":
+        action = request.form.get("action", "generate")
+
+        if action == "generate":
+            if not watsonx_configured:
+                flash("watsonx.ai credentials not configured.", "warning")
+                return redirect(url_for("behavioural_interview"))
+            try:
+                questions = generate_behavioural_questions(candidate, company)
+                sdata["behavioural_questions"] = questions
+                save_session_data(report_id, sdata)
+                return render_template(
+                    "behavioural.html",
+                    questions=questions,
+                    company=company,
+                    job_role=job_role,
+                    supported_companies=SUPPORTED_COMPANIES,
+                    watsonx_configured=watsonx_configured,
+                )
+            except Exception as e:
+                logger.error(f"Behavioural question generation error: {e}", exc_info=True)
+                flash(f"Generation failed: {e}", "danger")
+                return redirect(url_for("behavioural_interview"))
+
+        elif action == "evaluate":
+            competency = request.form.get("competency", "Leadership")
+            question = request.form.get("question", "")
+            answer = request.form.get("answer", "").strip()
+            if not answer:
+                flash("Please write an answer before submitting.", "warning")
+                return redirect(url_for("behavioural_interview"))
+            try:
+                result = evaluate_behavioural_answer(competency, question, answer, company)
+                questions = sdata.get("behavioural_questions", [])
+                return render_template(
+                    "behavioural.html",
+                    questions=questions,
+                    company=company,
+                    job_role=job_role,
+                    supported_companies=SUPPORTED_COMPANIES,
+                    watsonx_configured=watsonx_configured,
+                    star_result=result,
+                    evaluated_question=question,
+                    evaluated_answer=answer,
+                    evaluated_competency=competency,
+                )
+            except Exception as e:
+                logger.error(f"Behavioural evaluation error: {e}", exc_info=True)
+                flash(f"Evaluation failed: {e}", "danger")
+                return redirect(url_for("behavioural_interview"))
+
+    return render_template(
+        "behavioural.html",
+        questions=sdata.get("behavioural_questions"),
+        company=company,
+        job_role=job_role,
+        supported_companies=SUPPORTED_COMPANIES,
+        watsonx_configured=watsonx_configured,
+    )
+
+
+# ====================================================
+# LEARNING PLAN (PHASE 3.3)
+# ====================================================
+@app.route("/learning_plan")
+def learning_plan():
+    """
+    Generates a personalised learning plan from the current session data.
+    """
+    watsonx_configured = bool(os.getenv("WATSONX_APIKEY") and os.getenv("WATSONX_PROJECT_ID"))
+    if not watsonx_configured:
+        flash("watsonx.ai credentials not configured.", "warning")
+        return redirect(url_for("home"))
+
+    report_id = session.get("report_id")
+    sdata = load_session_data(report_id)
+
+    if not sdata:
+        flash("No active session. Please upload your resume first.", "warning")
+        return redirect(url_for("home"))
+
+    candidate = sdata.get("candidate", {})
+    job_role = session.get("current_job_role", "Software Engineer")
+    company = session.get("current_company", "IBM")
+    gap_result = sdata.get("gap_result", {})
+    readiness_result = sdata.get("readiness_result", {})
+
+    missing_skills = gap_result.get("missing_skills", []) + gap_result.get("recommended_skills", [])
+    # Weak category: those below 65
+    weak_cats = [
+        cat for cat, score in readiness_result.get("category_scores", {}).items()
+        if score < 65
+    ]
+
+    try:
+        plan = generate_learning_plan(candidate, job_role, company, missing_skills, weak_cats)
+        return render_template(
+            "learning_plan.html",
+            plan=plan,
+            candidate=candidate,
+            job_role=job_role,
+            company=company,
+            gap_result=gap_result,
+            readiness_result=readiness_result,
+        )
+    except Exception as e:
+        logger.error(f"Learning plan generation error: {e}", exc_info=True)
+        flash(f"Learning plan generation failed: {e}", "danger")
+        return redirect(url_for("home"))
+
+
+# ====================================================
+# ATS SCORE PAGE (PHASE 1.1 — dedicated view)
+# ====================================================
+@app.route("/ats")
+def ats_score():
+    """
+    Renders the dedicated ATS score analysis page.
+    Reads from session data — requires prior resume upload.
+    """
+    report_id = session.get("report_id")
+    sdata = load_session_data(report_id)
+
+    if not sdata:
+        flash("No active session found. Please upload your resume first.", "warning")
+        return redirect(url_for("home"))
+
+    ats_result = sdata.get("ats_result", {})
+    gap_result = sdata.get("gap_result", {})
+    candidate = sdata.get("candidate", {})
+    job_role = session.get("current_job_role", "")
+
+    if not ats_result:
+        flash("ATS analysis not available. Please re-upload your resume.", "warning")
+        return redirect(url_for("home"))
+
+    return render_template(
+        "ats_score.html",
+        ats_result=ats_result,
+        gap_result=gap_result,
+        candidate=candidate,
+        job_role=job_role,
+    )
+
+
+# ====================================================
+# STAR EVALUATOR API ENDPOINT (AJAX-compatible)
+# ====================================================
+@app.route("/api/star_evaluate", methods=["POST"])
+def api_star_evaluate():
+    """
+    JSON API endpoint for STAR method evaluation.
+    Accepts: { question, answer, job_role, company }
+    Returns: STAR evaluation JSON
+    """
+    watsonx_configured = bool(os.getenv("WATSONX_APIKEY") and os.getenv("WATSONX_PROJECT_ID"))
+    if not watsonx_configured:
+        return jsonify({"error": "watsonx.ai credentials not configured"}), 503
+
+    data = request.get_json(silent=True) or {}
+    question = data.get("question", "")
+    answer = data.get("answer", "")
+    job_role = data.get("job_role", session.get("current_job_role", "Software Engineer"))
+    company = data.get("company", session.get("current_company", "IBM"))
+
+    if not question or not answer:
+        return jsonify({"error": "question and answer are required"}), 400
+
+    try:
+        result = evaluate_star_answer(question, answer, job_role, company)
+        return jsonify(result)
+    except Exception as e:
+        logger.error(f"STAR API evaluation error: {e}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
+
 
 # Global error page triggers
 @app.errorhandler(500)

@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block title %}Behavioural Coach - Interview Trainer{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-4xl space-y-8">
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-100 dark:border-slate-900 pb-5">
+        <div class="space-y-1">
+            <div class="flex items-center gap-2 text-sm font-medium text-slate-400 dark:text-slate-500">
+                <span>Practice</span>
+                <i data-lucide="chevron-right" class="h-3.5 w-3.5"></i>
+                <span class="font-semibold text-slate-600 dark:text-slate-300">Behavioural Coach</span>
+            </div>
+            <h1 class="font-heading text-3xl sm:text-[38px] font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">Behavioural Interview Coach</h1>
+            <p class="text-sm text-slate-400">STAR method evaluation across 7 key competency areas · <span class="font-semibold text-indigo-500">{{ company }}</span></p>
+        </div>
+    </div>
+
+    {% if not watsonx_configured %}
+    <div class="rounded-xl border border-amber-200 bg-amber-50/50 dark:border-amber-900/30 dark:bg-amber-950/20 p-5">
+        <div class="flex gap-3">
+            <i data-lucide="alert-triangle" class="h-5 w-5 text-amber-500 flex-shrink-0"></i>
+            <p class="text-sm text-amber-700 dark:text-amber-400">watsonx.ai credentials are required. Please configure <code class="bg-amber-100 dark:bg-amber-900/50 px-1 rounded text-xs">WATSONX_APIKEY</code> and <code class="bg-amber-100 dark:bg-amber-900/50 px-1 rounded text-xs">WATSONX_PROJECT_ID</code>.</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Generate Questions Form -->
+    {% if not questions %}
+    <div class="rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950 p-8 space-y-6 shadow-sm">
+        <div class="space-y-2">
+            <h5 class="font-heading text-lg font-bold text-slate-900 dark:text-white">Generate Company-Specific Questions</h5>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Questions are tailored to <strong>{{ company }}</strong>'s values and interview style, covering all 7 behavioural competency areas.</p>
+        </div>
+
+        <form action="{{ url_for('behavioural_interview') }}" method="POST">
+            <input type="hidden" name="action" value="generate">
+            <button type="submit" class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-5 py-3 text-base font-bold text-white hover:bg-indigo-700 transition-all shadow-sm disabled:opacity-50"
+                {% if not watsonx_configured %}disabled{% endif %}>
+                <i data-lucide="sparkles" class="h-4.5 w-4.5"></i>
+                Generate {{ company }} Behavioural Questions
+            </button>
+        </form>
+    </div>
+
+    {% else %}
+
+    <!-- STAR Evaluation Result Banner -->
+    {% if star_result %}
+    <div class="rounded-xl border border-indigo-200 bg-indigo-50/30 dark:border-indigo-900/30 dark:bg-indigo-950/10 p-6 space-y-5">
+        <div class="flex items-center justify-between gap-4 flex-wrap">
+            <h5 class="font-heading text-base font-bold text-indigo-900 dark:text-indigo-200 flex items-center gap-2">
+                <i data-lucide="star" class="h-5 w-5 text-indigo-500"></i>
+                STAR Evaluation — {{ evaluated_competency }}
+            </h5>
+            <span class="font-heading text-2xl font-extrabold {% if star_result.star_score >= 75 %}text-emerald-600{% elif star_result.star_score >= 55 %}text-amber-500{% else %}text-red-500{% endif %}">
+                {{ star_result.star_score }}/100
+            </span>
+        </div>
+
+        <!-- STAR Breakdown Bars -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {% for label, key in [('Situation', 'situation_score'), ('Task', 'task_score'), ('Action', 'action_score'), ('Result', 'result_score')] %}
+            <div class="space-y-1.5">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">{{ label }}</span>
+                    <span class="text-xs font-bold text-slate-700 dark:text-slate-300">{{ star_result[key] }}/25</span>
+                </div>
+                <div class="h-2 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                    <div class="h-full rounded-full {% if star_result[key] >= 20 %}bg-emerald-500{% elif star_result[key] >= 12 %}bg-amber-400{% else %}bg-red-400{% endif %}"
+                        style="width: {{ (star_result[key] / 25 * 100)|int }}%;"></div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if star_result.missing_components %}
+        <div class="space-y-1.5">
+            <p class="text-xs font-bold text-red-600 dark:text-red-400 uppercase tracking-wide">Missing Components</p>
+            <ul class="space-y-1">
+                {% for item in star_result.missing_components %}
+                <li class="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-400">
+                    <span class="mt-1.5 h-1.5 w-1.5 rounded-full bg-red-400 flex-shrink-0"></span>
+                    {{ item }}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        {% if star_result.suggestions %}
+        <div class="space-y-1.5">
+            <p class="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wide">Improvement Suggestions</p>
+            <ul class="space-y-1">
+                {% for s in star_result.suggestions %}
+                <li class="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-400">
+                    <i data-lucide="arrow-right" class="h-3.5 w-3.5 mt-0.5 text-amber-500 flex-shrink-0"></i>
+                    {{ s }}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        {% if star_result.improved_example %}
+        <div class="rounded-lg bg-slate-50 dark:bg-slate-900/30 border border-slate-200 dark:border-slate-800 p-4 space-y-1">
+            <p class="text-xs font-bold text-slate-500 uppercase tracking-wide">Example Strong Answer Structure</p>
+            <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{{ star_result.improved_example }}</p>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Questions List -->
+    <div class="space-y-4">
+        <div class="flex items-center justify-between">
+            <h5 class="font-heading text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                <i data-lucide="list" class="h-5 w-5 text-indigo-500"></i>
+                {{ company }} Behavioural Questions
+            </h5>
+            <form action="{{ url_for('behavioural_interview') }}" method="POST" class="inline">
+                <input type="hidden" name="action" value="generate">
+                <button type="submit" class="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
+                    <i data-lucide="refresh-cw" class="h-3.5 w-3.5"></i>Regenerate
+                </button>
+            </form>
+        </div>
+
+        {% for item in questions %}
+        <details class="group border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden [&_summary::-webkit-details-marker]:hidden">
+            <summary class="flex items-center justify-between gap-3 cursor-pointer p-5 hover:bg-slate-50/50 dark:hover:bg-slate-900/30 transition-all select-none">
+                <div class="flex items-center gap-3 min-w-0">
+                    <span class="inline-flex items-center rounded-full bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/20 px-2.5 py-0.5 text-[11px] font-bold text-indigo-600 dark:text-indigo-400 flex-shrink-0">{{ item.competency }}</span>
+                    <span class="font-heading font-bold text-sm sm:text-base text-slate-850 dark:text-slate-200 leading-relaxed">{{ item.question }}</span>
+                </div>
+                <span class="transition-transform duration-200 group-open:-rotate-180 text-slate-400 flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </span>
+            </summary>
+            <div class="border-t border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-900/10 p-5">
+                <form action="{{ url_for('behavioural_interview') }}" method="POST" class="space-y-4">
+                    <input type="hidden" name="action" value="evaluate">
+                    <input type="hidden" name="competency" value="{{ item.competency }}">
+                    <input type="hidden" name="question" value="{{ item.question }}">
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Your STAR Answer</label>
+                        <textarea name="answer" rows="5" class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm text-slate-800 dark:text-slate-200 p-3.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all leading-relaxed resize-y" placeholder="Structure your answer using STAR: Situation → Task → Action → Result..." required></textarea>
+                    </div>
+                    <button type="submit" class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-indigo-700 transition-all">
+                        <i data-lucide="zap" class="h-4 w-4"></i>
+                        Evaluate with STAR
+                    </button>
+                </form>
+            </div>
+        </details>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+</div>
+
+<!-- Loading overlay -->
+<div id="loading-overlay" style="display:none;" class="fixed inset-0 z-[100] bg-slate-950/95 flex flex-col items-center justify-center">
+    <div class="text-center max-w-xs">
+        <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-indigo-950 text-indigo-400 mx-auto mb-4 border border-indigo-900/30">
+            <i data-lucide="loader" class="h-6 w-6 animate-spin"></i>
+        </div>
+        <h4 class="font-heading text-lg font-bold text-white mb-1">Evaluating STAR Response</h4>
+        <p class="text-xs text-slate-400">Granite is scoring your Situation, Task, Action, and Result components...</p>
+    </div>
+</div>
+<script>
+document.querySelectorAll("form").forEach(f => {
+    f.addEventListener("submit", function() {
+        if (this.querySelector('[name="action"][value="evaluate"]') || this.querySelector('[name="action"][value="generate"]')) {
+            document.getElementById("loading-overlay").style.display = "flex";
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -106,46 +106,59 @@
 
                 <!-- Navigation List -->
                 <nav class="space-y-1.5">
-                    <span class="block px-2 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Navigation</span>
+                    <span class="block px-2 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Preparation</span>
                     
-                    <a href="{{ url_for('home') }}" class="flex items-center gap-3 rounded-lg px-3.5 py-2.5 text-[15px] font-semibold transition-all
-                        {% if request.path == '/' and not report %}
-                            bg-slate-100 text-slate-900 dark:bg-slate-900 dark:text-white
-                        {% else %}
-                            text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-900/60 dark:hover:text-white
-                        {% endif %}">
-                        <i data-lucide="home" class="h-4 w-4"></i>
-                        <span>Overview</span>
-                    </a>
-                    
-                    <a href="{{ url_for('home') }}" class="flex items-center gap-3 rounded-lg px-3.5 py-2.5 text-[15px] font-semibold transition-all
-                        {% if request.path == '/' and report %}
-                            bg-slate-100 text-slate-900 dark:bg-slate-900 dark:text-white
-                        {% else %}
-                            text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-900/60 dark:hover:text-white
-                        {% endif %}">
+                    <a href="{{ url_for('home') }}" class="flex items-center gap-3 rounded-lg px-3.5 py-2.5 text-[14px] font-semibold transition-all
+                        {% if request.path == '/' %}bg-slate-100 text-slate-900 dark:bg-slate-900 dark:text-white
+                        {% else %}text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-900/60 dark:hover:text-white{% endif %}">
                         <i data-lucide="cpu" class="h-4 w-4"></i>
                         <span>AI Interview Coach</span>
                     </a>
-                    
-                    <a href="{{ url_for('jd_match') }}" class="flex items-center gap-3 rounded-lg px-3.5 py-2.5 text-[15px] font-semibold transition-all
-                        {% if request.path.startswith('/jd_match') %}
-                            bg-slate-100 text-slate-900 dark:bg-slate-900 dark:text-white
-                        {% else %}
-                            text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-900/60 dark:hover:text-white
-                        {% endif %}">
-                        <i data-lucide="sliders" class="h-4.5 w-4.5"></i>
+
+                    <a href="{{ url_for('jd_match') }}" class="flex items-center gap-3 rounded-lg px-3.5 py-2.5 text-[14px] font-semibold transition-all
+                        {% if request.path.startswith('/jd_match') %}bg-slate-100 text-slate-900 dark:bg-slate-900 dark:text-white
+                        {% else %}text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-900/60 dark:hover:text-white{% endif %}">
+                        <i data-lucide="sliders" class="h-4 w-4"></i>
                         <span>Career Match</span>
                     </a>
-                    
-                    <a href="{{ url_for('mock_start') }}" class="flex items-center gap-3 rounded-lg px-3.5 py-2.5 text-[15px] font-semibold transition-all
-                        {% if request.path.startswith('/mock') %}
-                            bg-slate-100 text-slate-900 dark:bg-slate-900 dark:text-white
-                        {% else %}
-                            text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-900/60 dark:hover:text-white
-                        {% endif %}">
-                        <i data-lucide="play-circle" class="h-4.5 w-4.5"></i>
+
+                    <a href="{{ url_for('ats_score') }}" class="flex items-center gap-3 rounded-lg px-3.5 py-2.5 text-[14px] font-semibold transition-all
+                        {% if request.path == '/ats' %}bg-slate-100 text-slate-900 dark:bg-slate-900 dark:text-white
+                        {% else %}text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-900/60 dark:hover:text-white{% endif %}">
+                        <i data-lucide="scan-text" class="h-4 w-4"></i>
+                        <span>ATS Score</span>
+                    </a>
+
+                    <span class="block px-2 pt-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">Practice</span>
+
+                    <a href="{{ url_for('mock_start') }}" class="flex items-center gap-3 rounded-lg px-3.5 py-2.5 text-[14px] font-semibold transition-all
+                        {% if request.path.startswith('/mock') %}bg-slate-100 text-slate-900 dark:bg-slate-900 dark:text-white
+                        {% else %}text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-900/60 dark:hover:text-white{% endif %}">
+                        <i data-lucide="play-circle" class="h-4 w-4"></i>
                         <span>Interview Simulator</span>
+                    </a>
+
+                    <a href="{{ url_for('behavioural_interview') }}" class="flex items-center gap-3 rounded-lg px-3.5 py-2.5 text-[14px] font-semibold transition-all
+                        {% if request.path.startswith('/behavioural') %}bg-slate-100 text-slate-900 dark:bg-slate-900 dark:text-white
+                        {% else %}text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-900/60 dark:hover:text-white{% endif %}">
+                        <i data-lucide="message-circle" class="h-4 w-4"></i>
+                        <span>Behavioural Coach</span>
+                    </a>
+
+                    <span class="block px-2 pt-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">Progress</span>
+
+                    <a href="{{ url_for('learning_plan') }}" class="flex items-center gap-3 rounded-lg px-3.5 py-2.5 text-[14px] font-semibold transition-all
+                        {% if request.path == '/learning_plan' %}bg-slate-100 text-slate-900 dark:bg-slate-900 dark:text-white
+                        {% else %}text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-900/60 dark:hover:text-white{% endif %}">
+                        <i data-lucide="book-open" class="h-4 w-4"></i>
+                        <span>Learning Plan</span>
+                    </a>
+
+                    <a href="{{ url_for('analytics_dashboard') }}" class="flex items-center gap-3 rounded-lg px-3.5 py-2.5 text-[14px] font-semibold transition-all
+                        {% if request.path == '/analytics' %}bg-slate-100 text-slate-900 dark:bg-slate-900 dark:text-white
+                        {% else %}text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-900/60 dark:hover:text-white{% endif %}">
+                        <i data-lucide="bar-chart-2" class="h-4 w-4"></i>
+                        <span>Analytics</span>
                     </a>
                 </nav>
             </div>
@@ -157,7 +170,7 @@
                 <div class="flex items-center justify-between">
                     <span class="text-xs font-bold text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
                         <i data-lucide="settings" class="h-3.5 w-3.5"></i>
-                        v1.0.0
+                        v2.0.0
                     </span>
                     
                     <!-- Theme Toggle Icon Button -->

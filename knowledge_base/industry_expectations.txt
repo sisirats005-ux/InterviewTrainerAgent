@@ -1,0 +1,101 @@
+=== INDUSTRY EXPECTATIONS & CAREER READINESS ===
+
+--- TOPIC: WHAT COMPANIES LOOK FOR IN ENTRY-LEVEL ENGINEERS ---
+Beyond technical skills, companies evaluate:
+1. LEARNING AGILITY: Can you pick up new tools quickly? Show examples of self-taught skills.
+2. COMMUNICATION: Can you explain technical decisions clearly to both technical and non-technical audiences?
+3. OWNERSHIP: Do you take responsibility for your work, including bugs and failures?
+4. COLLABORATION: Can you work in a team, give and receive code reviews, and resolve disagreements professionally?
+5. PROBLEM DECOMPOSITION: Can you break large ambiguous problems into structured, solvable components?
+
+--- TOPIC: PORTFOLIO EXPECTATIONS BY ROLE ---
+
+Software Engineer / Backend:
+  - 2-3 GitHub projects with clean code, README files, and documented APIs
+  - At least one project using a database (PostgreSQL/MongoDB) + REST API
+  - Evidence of testing (unit tests, pytest, or test coverage badge)
+  - One project deployed live (Heroku, Render, Vercel, or IBM Cloud)
+
+Data Scientist / ML Engineer:
+  - Jupyter notebooks with clean markdown cells explaining analysis
+  - Projects using scikit-learn, pandas, matplotlib/seaborn
+  - At least one NLP or computer vision project
+  - Kaggle profile with competition participations
+
+Frontend Developer:
+  - Responsive UI projects deployed and accessible via URL
+  - Evidence of performance optimisation (Lighthouse scores)
+  - Accessible design (WCAG 2.1 AA compliance knowledge)
+
+DevOps / Cloud Engineer:
+  - Terraform or CloudFormation infrastructure scripts on GitHub
+  - CI/CD pipeline implemented (GitHub Actions, Jenkins, or GitLab CI)
+  - Dockerfile and docker-compose.yml for at least one project
+
+--- TOPIC: FRESHER VS EXPERIENCED CANDIDATE EXPECTATIONS ---
+
+Fresher (0-1 year experience):
+  - Academic projects count — but must be real, working, and deployed
+  - Certifications carry more weight when experience is limited
+  - Internship experience is the most valued signal after skills
+  - GPA matters less than portfolio and problem-solving ability
+  - Communication and enthusiasm often outweigh technical depth
+
+Mid-Level (2-5 years):
+  - Expected to architect features independently
+  - Should demonstrate ownership of production systems
+  - Code reviews, mentoring, and documentation ability evaluated
+  - System design questions become mandatory from this level
+  - Contributions to open-source, tech blogs, or talks are differentiators
+
+Senior (5+ years):
+  - Expected to drive technical direction, not just execute
+  - API design, scalability decisions, and cross-team influence
+  - Trade-off reasoning, cost awareness, and long-term code quality
+
+--- TOPIC: INTERVIEW EVALUATION CRITERIA (HOW YOU ARE SCORED) ---
+Most tech companies use a rubric with 4-5 dimensions:
+
+1. PROBLEM SOLVING (weighted highest)
+   Did they understand the problem? Did they find an appropriate algorithm? Did they optimise?
+
+2. CODING PROFICIENCY
+   Is the code clean, readable, and correct? Handles edge cases?
+
+3. COMMUNICATION
+   Did they explain their approach? Narrate while coding? Ask clarifying questions?
+
+4. DESIGN THINKING
+   (For senior/design rounds) Did they consider scalability, maintainability, and trade-offs?
+
+5. CULTURE FIT / COLLABORATION
+   Do they respond well to hints? Take feedback gracefully? Show intellectual curiosity?
+
+--- TOPIC: PRE-INTERVIEW RESEARCH CHECKLIST ---
+Before any technical interview, research:
+1. Company's latest products, services, and strategic announcements (LinkedIn, blog)
+2. The team's tech stack (check job description, engineering blog)
+3. 3-5 recent technical blog posts from their engineering team
+4. The interviewer's name on LinkedIn (if provided) — know their background
+5. Glassdoor interview reviews for that specific company + role
+6. The company's competitors and how they differentiate
+
+--- TOPIC: INDUSTRY SALARY BENCHMARKS (INDIA — 2025-2026) ---
+Entry-Level (0-2 years):
+  - TCS/Infosys/Wipro/HCL: ₹3.5-6 LPA
+  - Mid-tier product companies: ₹6-12 LPA
+  - Startups (funded): ₹8-18 LPA
+  - FAANG/Big Tech (India offices): ₹15-35 LPA
+
+Mid-Level (3-6 years):
+  - IT Services: ₹8-15 LPA
+  - Product companies: ₹18-40 LPA
+  - FAANG: ₹40-80 LPA + equity
+
+Negotiation Tips:
+  - Always negotiate — 70% of offers have negotiating room
+  - Know your market value (Levels.fyi, Glassdoor, LinkedIn Salary)
+  - Counter-offer with a specific number, not a range
+  - Consider total compensation: base + bonus + ESOPs + benefits
+
+=== END OF INDUSTRY EXPECTATIONS KNOWLEDGE BASE ===
