@@ -1,11 +1,30 @@
-# Interview Trainer Agent (Upgraded)
+# AI Interview Coach Agent
 
-An advanced, production-ready AI interview preparation and profile matching dashboard built for the **IBM SkillsBuild + Edunet Foundation** initiative.
+An AI-powered Interview Coach Agent developed as part of the IBM SkillsBuild and Edunet Foundation University Engagement Program.
 
-This application uses a Retrieval-Augmented Generation (RAG) architecture powered by **IBM watsonx.ai Granite 4** (`ibm/granite-4-h-small`) and a local **FAISS** vector database. It parses resumes and job descriptions, scores candidacy alignment against companies (such as IBM, Google, or Microsoft) and difficulty levels, and guides applicants through interactive mock interviews.
+The application leverages IBM watsonx.ai, IBM Granite Foundation Models, Retrieval-Augmented Generation (RAG), and a FAISS vector database to deliver personalized interview preparation, ATS resume analysis, career matching, AI-powered mock interviews, performance evaluation, and personalized learning roadmaps.
 
----
+## Technologies Used
 
+- IBM watsonx.ai
+- IBM Granite Foundation Model (ibm/granite-4-h-small)
+- Retrieval-Augmented Generation (RAG)
+- FAISS Vector Database
+- Flask
+- Python
+- HTML
+- CSS
+- JavaScript
+## Core Features
+
+- Resume Analysis & ATS Scoring
+- Career Match Analysis
+- AI Mock Interview
+- Interview Performance Evaluation
+- Personalized Learning Roadmap
+- Analytics Dashboard
+- RAG-based Knowledge Retrieval
+- PDF Interview Report Generation
 ## Key Features
 
 - **Advanced Resume Parsing**: Extracts Name, Email, Phone, LinkedIn, GitHub, Skills, Education, Experience, Projects, Certifications, and Achievements using **PyMuPDF**. Technical skills are classified into Languages, Frameworks, Databases, AI/ML, Cloud, and Tools.
