@@ -1,0 +1,34 @@
+{
+  "name": "InterviewTrainerAgent",
+  "description": "An AI-powered interview preparation platform using IBM watsonx.ai, IBM Granite Models, LangFlow, and RAG for resume analysis, ATS scoring, career matching, and mock interviews.",
+  "repository": "https://github.com/sisirats005-ux/InterviewTrainerAgent",
+  "logo": "https://raw.githubusercontent.com/sisirats005-ux/InterviewTrainerAgent/main/screenshots/home.png",
+  "keywords": [
+    "Python",
+    "Flask",
+    "IBM watsonx.ai",
+    "IBM Granite",
+    "LangFlow",
+    "RAG",
+    "FAISS",
+    "AI",
+    "Interview Preparation"
+  ],
+  "website": "https://github.com/sisirats005-ux/InterviewTrainerAgent",
+  "success_url": "/",
+  "env": {
+    "WATSONX_APIKEY": {
+      "description": "IBM watsonx.ai API Key"
+    },
+    "WATSONX_PROJECT_ID": {
+      "description": "IBM watsonx.ai Project ID"
+    },
+    "WATSONX_URL": {
+      "description": "IBM watsonx.ai Service URL",
+      "value": "https://eu-de.ml.cloud.ibm.com"
+    },
+    "FLASK_SECRET_KEY": {
+      "description": "Secret key for Flask sessions"
+    }
+  }
+}
