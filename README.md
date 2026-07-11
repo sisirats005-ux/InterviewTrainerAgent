@@ -1,184 +1,237 @@
 # AI Interview Coach Agent
 
-An AI-powered Interview Coach Agent developed as part of the IBM SkillsBuild and Edunet Foundation University Engagement Program.
-
-The application leverages IBM watsonx.ai, IBM Granite Foundation Models, Retrieval-Augmented Generation (RAG), and a FAISS vector database to deliver personalized interview preparation, ATS resume analysis, career matching, AI-powered mock interviews, performance evaluation, and personalized learning roadmaps.
-
-## Technologies Used
-
-- IBM watsonx.ai
-- IBM Granite Foundation Model (ibm/granite-4-h-small)
-- Retrieval-Augmented Generation (RAG)
-- FAISS Vector Database
-- Flask
-- Python
-- HTML
-- CSS
-- JavaScript
-## Core Features
-
-- Resume Analysis & ATS Scoring
-- Career Match Analysis
-- AI Mock Interview
-- Interview Performance Evaluation
-- Personalized Learning Roadmap
-- Analytics Dashboard
-- RAG-based Knowledge Retrieval
-- PDF Interview Report Generation
-## Key Features
-
-- **Advanced Resume Parsing**: Extracts Name, Email, Phone, LinkedIn, GitHub, Skills, Education, Experience, Projects, Certifications, and Achievements using **PyMuPDF**. Technical skills are classified into Languages, Frameworks, Databases, AI/ML, Cloud, and Tools.
-- **Job Description Matcher**: Compares candidate resumes against job descriptions (PDF, DOCX, or TXT) to calculate Match Percentages, extract missing technologies, and generate custom upskilling roadmaps.
-- **Weighted Readiness Scoring**: Replaces raw percentages with a structured score model weighting skills (25%), role fit (20%), experience (15%), projects (15%), certifications (10%), education (10%), and resume layout quality (5%).
-- **Matplotlib Visual Analytics**: Compiles category alignment ratings into horizontal bar charts saved in `static/charts/` and rendered on the results dashboard.
-- **Company & Difficulty Profiles**: Adjusts Granite prompts based on selected companies (e.g. Google's algorithmic focus vs IBM's enterprise hybrid cloud focus) and difficulty levels (Easy, Medium, Hard).
-- **Interactive Mock Interview Session**: Guides candidates through a 5-question mock loop, maintaining state in Flask sessions. It evaluates text answers for scores (0-100), strengths, weaknesses, corrective feedback, and ideal answers.
-- **Multi-Format RAG Cache**: Splits and indexes PDF, DOCX, TXT, and Markdown files in `knowledge_base/`. Tracks changes using `vector_db/manifest.json` to automatically rebuild the FAISS database index only when files change.
-- **Robust JSON Parsing & Retries**: Specifies strict JSON formats from Granite and runs a validation loop (up to 3 retries) with warning logs, falling back to a regex decoder to prevent application exceptions.
-- **PDF Report Downloads**: Compiles complete interview manuals (with scores, Q&As, and roadmaps) into multi-page PDFs using PyMuPDF.
-- **Production Security & Logs**: Restricts uploads to 4MB, checks file headers for magic bytes (`%PDF-` / `PK`) to verify MIME signatures, writes execution trails to `app.log`, and serves errors gracefully.
+AI Interview Coach Agent is an intelligent interview preparation platform developed as part of the **IBM SkillsBuild** and **Edunet Foundation University Engagement Program**. The application leverages **IBM watsonx.ai**, **IBM Granite Foundation Models**, **Retrieval-Augmented Generation (RAG)**, and **FAISS Vector Database** to provide ATS resume analysis, career matching, AI-powered mock interviews, interview performance evaluation, and personalized learning recommendations.
 
 ---
 
-## Upgraded File Structure
+## Live Application
 
+**Live Demo**
+
+https://interviewtraineragent-174815016344.asia-south1.run.app/
+
+**Model**
+
+IBM Granite 4 H Small
+
+**Deployment Platform**
+
+Google Cloud Run
+
+---
+
+## Project Overview
+
+The platform assists students and job seekers in preparing for technical interviews by analyzing resumes, comparing them with job descriptions, identifying missing skills, conducting AI-powered mock interviews, and generating detailed feedback reports.
+
+The application integrates IBM Granite Foundation Models through IBM watsonx.ai to generate personalized interview questions, evaluate responses, and recommend improvement strategies.
+
+---
+
+## Features
+
+| Module | Description |
+|---------|-------------|
+| Resume Parser | Extracts candidate information from resumes |
+| ATS Analysis | Calculates ATS score and identifies missing keywords |
+| Career Match | Matches resumes with job descriptions |
+| Skill Gap Analysis | Identifies missing technical skills |
+| AI Mock Interview | Conducts company-specific mock interviews |
+| Performance Evaluation | Evaluates interview answers using IBM Granite |
+| Learning Roadmap | Generates personalized learning recommendations |
+| Analytics Dashboard | Displays interview statistics and visual reports |
+| PDF Report | Generates downloadable interview reports |
+| Knowledge Base | Uses RAG with FAISS for contextual responses |
+
+---
+
+## Technology Stack
+
+| Category | Technologies |
+|----------|--------------|
+| Artificial Intelligence | IBM watsonx.ai, IBM Granite 4 H Small |
+| Backend | Flask, Python |
+| Frontend | HTML, CSS, JavaScript |
+| Vector Database | FAISS |
+| AI Technique | Retrieval-Augmented Generation (RAG) |
+| Visualization | Matplotlib |
+| PDF Generation | PyMuPDF |
+| Deployment | Docker, Google Cloud Run |
+
+---
+
+## System Architecture
+
+```text
+                 User
+                   │
+                   ▼
+         Flask Web Application
+                   │
+         Resume Processing Layer
+                   │
+      ┌────────────┴────────────┐
+      │                         │
+      ▼                         ▼
+ Resume Parser           Knowledge Base
+      │                         │
+      └────────────┬────────────┘
+                   ▼
+          FAISS Vector Database
+                   │
+                   ▼
+      IBM watsonx.ai (Granite Model)
+                   │
+      ┌────────────┼────────────┐
+      ▼            ▼            ▼
+ ATS Analysis  Mock Interview  Career Match
+      │            │            │
+      └────────────┼────────────┘
+                   ▼
+       Dashboard & PDF Report
 ```
+
+---
+
+## Application Workflow
+
+```text
+Upload Resume
+      │
+      ▼
+Resume Parsing
+      │
+      ▼
+ATS Analysis
+      │
+      ▼
+Career Match Analysis
+      │
+      ▼
+Skill Gap Analysis
+      │
+      ▼
+Mock Interview
+      │
+      ▼
+Performance Evaluation
+      │
+      ▼
+Learning Roadmap
+      │
+      ▼
+PDF Report Generation
+```
+
+---
+
+## Project Structure
+
+```text
 InterviewTrainerAgent/
 │
-├── .env                  # Local credentials
-├── .env.example          # Environment variables template
-├── .gitignore            # Excludes credentials, caches, and logs
-├── app.py                # Flask server, route maps, uploads, session managers
-├── granite.py            # IBM watsonx.ai LLM wrapper
-├── rag.py                # Multi-format document loader & auto-rebuild RAG pipeline
-├── resume_parser.py      # PDF parsing, categorized skills list, and detail extractor
-├── interview.py          # Prompt engineering, matching, and JSON retry loops
-├── pdf_generator.py      # PyMuPDF-based multi-page PDF manual compiler
-├── run_tests.py          # Unified unittest suite (parser, LLM, RAG, scoring, routes)
-├── requirements.txt      # Python dependencies
-├── Dockerfile            # Container build spec
-├── docker-compose.yml    # Multi-container orchestration spec
-├── render.yaml           # Render deployment configuration spec
-├── Procfile              # Gunicorn web task spec
+├── app.py
+├── granite.py
+├── interview.py
+├── rag.py
+├── analytics.py
+├── ats_analyzer.py
+├── skill_gap.py
+├── readiness_score.py
+├── resume_parser.py
+├── pdf_generator.py
+├── requirements.txt
+├── Dockerfile
+├── app.json
+├── README.md
 │
-├── knowledge_base/       # Source files for RAG index
-├── static/               # CSS, JS, and Matplotlib charts
-├── templates/            # HTML views (home, result, mock interview, JD match, error)
-├── uploads/              # Temp upload storage
-└── vector_db/            # Cached FAISS files and manifest.json
+├── knowledge_base/
+├── screenshots/
+├── static/
+├── templates/
+├── uploads/
+└── vector_db/
 ```
 
 ---
 
-## Setup & Running Locally
+## Installation
 
-### 1. Initialize Virtual Environment
-Initialize and activate a virtual environment in the project root:
+Clone the repository.
+
+```bash
+git clone https://github.com/sisirats005-ux/InterviewTrainerAgent.git
+
+cd InterviewTrainerAgent
+```
+
+Create a virtual environment.
+
 ```bash
 python -m venv .venv
-# On Windows (PowerShell):
-.venv\Scripts\Activate.ps1
-# On Linux/MacOS:
+```
+
+Windows
+
+```bash
+.venv\Scripts\activate
+```
+
+Linux/macOS
+
+```bash
 source .venv/bin/activate
 ```
 
-### 2. Install Requirements
+Install dependencies.
+
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Configure Credentials (`.env`)
-Create a `.env` file containing your watsonx configurations:
+Create a `.env` file.
+
 ```env
-WATSONX_APIKEY=your_watsonx_api_key
-WATSONX_PROJECT_ID=your_watsonx_project_id
-WATSONX_URL=https://eu-de.ml.cloud.ibm.com
-FLASK_SECRET_KEY=some_random_secret_key_string
+WATSONX_APIKEY=your_api_key
+WATSONX_PROJECT_ID=your_project_id
+WATSONX_URL=https://us-south.ml.cloud.ibm.com
+FLASK_SECRET_KEY=your_secret_key
 ```
 
-### 4. Compile Sample PDF Resume
-Create the default test profile `sample_resume.pdf` (contains skills, contact info, CKA & AWS certifications, and university achievements):
-```bash
-python generate_sample_resume.py
-```
+Run the application.
 
-### 5. Run Automated Tests
-Execute the testing suite to verify that all modules are integrated:
-```bash
-python run_tests.py
-```
-You should see: `Ran 5 tests ... OK`.
-
-### 6. Start local development server
 ```bash
 python app.py
 ```
-Navigate to `http://127.0.0.1:5000/` in your browser.
 
 ---
 
-## Deployment Instructions
+## Deployment
 
-### A. Deploy to Render
-Render automatically discovers and loads configuration details from `render.yaml`.
-1. Push your project to a GitHub repository.
-2. Log into the [Render Dashboard](https://dashboard.render.com/).
-3. Click **New** -> **Blueprints**.
-4. Connect your GitHub repository. Render will automatically configure the Python environment, install Gunicorn, set up the build command (`pip install -r requirements.txt`), and launch the start command (`gunicorn app:app`).
-5. Open **Environment Variables** in Render, and input your `WATSONX_APIKEY` and `WATSONX_PROJECT_ID` secret keys.
+The application is containerized using Docker and deployed on **Google Cloud Run**.
 
-### B. Deploy to IBM Code Engine
-IBM Code Engine is a fully managed serverless platform that runs containerized workloads.
-1. Build the Docker image locally or using Docker Hub:
-   ```bash
-   docker build -t your-dockerhub-username/interview-trainer-agent:latest .
-   docker push your-dockerhub-username/interview-trainer-agent:latest
-   ```
-2. Log into the IBM Cloud Console and navigate to **Code Engine**.
-3. Create a **Project** in Code Engine.
-4. Go to **Applications** -> Click **Create**.
-5. Configure the Application:
-   - **Name**: `interview-trainer-agent`
-   - **Image reference**: `docker.io/your-dockerhub-username/interview-trainer-agent:latest`
-   - **Target Port**: `5000`
-6. Add the following **Environment Variables**:
-   - `WATSONX_APIKEY` (Use Code Engine secret reference for security)
-   - `WATSONX_PROJECT_ID` (Define as a Literal value)
-   - `WATSONX_URL` (Set to `https://eu-de.ml.cloud.ibm.com`)
-   - `FLASK_SECRET_KEY` (Define as a secure secret)
-7. Click **Create** to deploy. Code Engine will build the container, route traffic, and scale instances to zero when idle.
-# Screenshots
+Required environment variables:
 
-## Home Dashboard
-
-![Home](screenshots/Screenshot%202026-06-27%20195711.png)
+- WATSONX_APIKEY
+- WATSONX_PROJECT_ID
+- WATSONX_URL
+- FLASK_SECRET_KEY
 
 ---
 
-## Interview Preparation Dashboard
+## Future Enhancements
 
-![Dashboard](screenshots/Screenshot%202026-06-27%20195848.png)
-
----
-
-## Interactive AI Interview
-
-![Feedback](screenshots/Screenshot%202026-06-27%20200019.png)
+- Voice-based interview mode
+- Webcam-based interview analysis
+- Coding interview assessment
+- Multi-language interview support
+- Mobile application
 
 ---
 
-## Interview Performance
+## License
 
-![Results](screenshots/Screenshot%202026-06-27%20200625.png)
-
----
-
-## Critical Missing Skills
-
-![Missing Skills](screenshots/Screenshot%202026-06-27%20200636.png)
+This project is licensed under the MIT License.
 
 ---
 
-## Model Answer Reference
-
-![Ideal Answer](screenshots/Screenshot%202026-06-27%20200643.png)
