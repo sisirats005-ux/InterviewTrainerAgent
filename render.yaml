@@ -10,6 +10,6 @@ services:
       - key: WATSONX_PROJECT_ID
         sync: false
       - key: WATSONX_URL
-        value: https://eu-de.ml.cloud.ibm.com
+        value: https://us-south.ml.cloud.ibm.com
       - key: FLASK_SECRET_KEY
         generateValue: true
