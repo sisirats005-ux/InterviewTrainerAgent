@@ -4,19 +4,13 @@ AI Interview Coach Agent is an intelligent interview preparation platform develo
 
 ---
 
-## Live Application
 
-**Live Demo**
-
-https://interviewtraineragent-174815016344.asia-south1.run.app/
 
 **Model**
 
 IBM Granite 4 H Small
 
-**Deployment Platform**
 
-Google Cloud Run
 
 ---
 
@@ -56,7 +50,6 @@ The application integrates IBM Granite Foundation Models through IBM watsonx.ai 
 | AI Technique | Retrieval-Augmented Generation (RAG) |
 | Visualization | Matplotlib |
 | PDF Generation | PyMuPDF |
-| Deployment | Docker, Google Cloud Run |
 
 ---
 
